@@ -1,6 +1,18 @@
-import { createClient, type SupabaseClient } from "npm:@supabase/supabase-js@2.45.4";
+import { createClient, type SupabaseClient } from "npm:@supabase/supabase-js@2.58.0";
 
 export const LOGIN_EMAIL_DOMAIN = "meals.invalid";
+
+// Prefers the project's secret key. The local stack may only provide the older variable.
+function serverKey(): string {
+  const keys = Deno.env.get("SUPABASE_SECRET_KEYS");
+  if (keys) {
+    const parsed = JSON.parse(keys) as Record<string, string>;
+    const key = parsed.default ?? Object.values(parsed)[0];
+    if (key) return key;
+  }
+  console.warn("SUPABASE_SECRET_KEYS not set, using SUPABASE_SERVICE_ROLE_KEY");
+  return Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+}
 
 export type AdminContext = { service: SupabaseClient; adminId: string };
 
@@ -28,7 +40,7 @@ export async function requireAdmin(req: Request): Promise<AdminContext | Respons
 
   const service = createClient(
     Deno.env.get("SUPABASE_URL")!,
-    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+    serverKey(),
     { auth: { persistSession: false, autoRefreshToken: false } },
   );
 

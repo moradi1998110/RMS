@@ -5,8 +5,8 @@
 
 set -u
 
-eval "$(supabase status -o env | grep -E '^(API_URL|ANON_KEY|SERVICE_ROLE_KEY)=')"
-export API_URL SERVICE_ROLE_KEY
+eval "$(supabase status -o env | grep -E '^(API_URL|PUBLISHABLE_KEY|SECRET_KEY)=')"
+export API_URL SECRET_KEY
 
 failures=0
 
@@ -27,7 +27,7 @@ random_password() {
 login() {
   jq -n --arg email "$1@meals.invalid" --arg password "$2" '{email: $email, password: $password}' |
     curl -sS "$API_URL/auth/v1/token?grant_type=password" \
-      -H "apikey: $ANON_KEY" -H "Content-Type: application/json" -d @-
+      -H "apikey: $PUBLISHABLE_KEY" -H "Content-Type: application/json" -d @-
 }
 
 token_of() {
@@ -55,7 +55,7 @@ rest() {
   [ "$#" -ge 4 ] && data=(-d "$4")
   local response
   response="$(curl -sS -w '\n%{http_code}' -X "$2" "$API_URL/rest/v1/$3" \
-    -H "apikey: $ANON_KEY" -H "Authorization: Bearer $1" \
+    -H "apikey: $PUBLISHABLE_KEY" -H "Authorization: Bearer $1" \
     -H "Content-Type: application/json" -H "Prefer: return=representation" "${data[@]}")"
   STATUS="$(tail -n1 <<< "$response")"
   BODY="$(sed '$d' <<< "$response")"
@@ -69,7 +69,7 @@ expect "the first admin can sign in" "$([ -n "$admin_token" ] && echo yes || ech
 
 echo "# Nobody can register alone"
 signup_status="$(curl -sS -o /dev/null -w '%{http_code}' "$API_URL/auth/v1/signup" \
-  -H "apikey: $ANON_KEY" -H "Content-Type: application/json" \
+  -H "apikey: $PUBLISHABLE_KEY" -H "Content-Type: application/json" \
   -d '{"email":"stranger@meals.invalid","password":"stranger-password"}')"
 expect "self sign-up is refused" "$signup_status" "422"
 
@@ -148,7 +148,7 @@ echo "# Meal images"
 # upload <token> <folder> <file> <content type>: prints the HTTP status.
 upload() {
   curl -sS -o /dev/null -w '%{http_code}' -X POST "$API_URL/storage/v1/object/meal-images/$2/$(basename "$3")" \
-    -H "apikey: $ANON_KEY" -H "Authorization: Bearer $1" -H "Content-Type: $4" --data-binary "@$3"
+    -H "apikey: $PUBLISHABLE_KEY" -H "Authorization: Bearer $1" -H "Content-Type: $4" --data-binary "@$3"
 }
 image_dir="$(mktemp -d)"
 head -c 2048 /dev/urandom > "$image_dir/meal.webp"
@@ -172,7 +172,7 @@ echo "# Changing the password"
 new_password="$(random_password)"
 change_status="$(jq -n --arg password "$new_password" '{password: $password}' |
   curl -sS -o /dev/null -w '%{http_code}' -X PUT "$API_URL/auth/v1/user" \
-    -H "apikey: $ANON_KEY" -H "Authorization: Bearer $employee_token" \
+    -H "apikey: $PUBLISHABLE_KEY" -H "Authorization: Bearer $employee_token" \
     -H "Content-Type: application/json" -d @-)"
 expect "the employee sets a new password" "$change_status" "200"
 rest "$employee_token" POST "rpc/mark_password_changed" '{}'
@@ -194,7 +194,7 @@ expect "the old password stops working" "$(can_login acct-emp "$new_password")" 
 
 refresh_status="$(jq -n --arg token "$employee_refresh" '{refresh_token: $token}' |
   curl -sS -o /dev/null -w '%{http_code}' "$API_URL/auth/v1/token?grant_type=refresh_token" \
-    -H "apikey: $ANON_KEY" -H "Content-Type: application/json" -d @-)"
+    -H "apikey: $PUBLISHABLE_KEY" -H "Content-Type: application/json" -d @-)"
 expect "a lost phone can no longer renew its session" "$refresh_status" "400"
 
 employee_token="$(token_of acct-emp "$temp_password")"

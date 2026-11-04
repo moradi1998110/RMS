@@ -29,7 +29,19 @@ jobs:
       - name: Create the admin
         shell: bash
         run: |
-          SERVICE_ROLE_KEY="$(supabase projects api-keys --project-ref "$SUPABASE_PROJECT_REF" -o json | jq -r '.[] | select(.name == "service_role") | .api_key')"
-          echo "::add-mask::$SERVICE_ROLE_KEY"
-          export SERVICE_ROLE_KEY
+          source scripts/fetch-keys.sh
           bash scripts/bootstrap-admin.sh
+
+          # Sign in and reach a function: a bad username is only refused after the
+          # function has confirmed this is an admin using the project's secret key.
+          token="$(jq -n --arg email "$ADMIN_USERNAME@meals.invalid" --arg password "$ADMIN_PASSWORD" '{email: $email, password: $password}' |
+            curl -sS "$API_URL/auth/v1/token?grant_type=password" \
+              -H "apikey: $PUBLISHABLE_KEY" -H "Content-Type: application/json" -d @- |
+            jq -r '.access_token // empty')"
+          [ -n "$token" ] || { echo "The new admin could not sign in"; exit 1; }
+          answer="$(curl -sS "$API_URL/functions/v1/create-user" \
+            -H "apikey: $PUBLISHABLE_KEY" -H "Authorization: Bearer $token" \
+            -H "Content-Type: application/json" -d '{"username":"a b","full_name":"x","role":"employee"}' |
+            jq -r '.error // empty')"
+          echo "create-user answered: $answer"
+          [ "$answer" = "invalid_username" ]
