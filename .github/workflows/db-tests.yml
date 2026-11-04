@@ -2,10 +2,12 @@ name: Database tests
 
 on:
   push:
+    branches-ignore:
+      - ci-results
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write # only used to publish logs to the ci-results branch
 
 jobs:
   db-tests:
@@ -42,3 +44,16 @@ jobs:
             echo "::error title=Tests failed::$message"
           fi
           exit "$code"
+
+      # Keeps the latest logs readable with plain git, on a branch of their own.
+      - name: Publish logs
+        if: always()
+        shell: bash
+        run: |
+          echo "${{ github.sha }} ${{ job.status }}" > result.log
+          git config user.name "github-actions"
+          git config user.email "github-actions@users.noreply.github.com"
+          git switch --orphan ci-results
+          git add -f ./*.log
+          git commit -q -m "Test logs for ${{ github.sha }}"
+          git push -f origin ci-results
