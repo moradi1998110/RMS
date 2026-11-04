@@ -4,6 +4,7 @@ on:
   push:
     branches-ignore:
       - ci-results
+      - deploy-results
   workflow_dispatch:
 
 permissions:
@@ -26,7 +27,7 @@ jobs:
         shell: bash
         run: |
           set +e
-          supabase start -x studio,imgproxy,mailpit,logflare,vector,realtime,storage-api,postgres-meta 2>&1 | tee start.log
+          supabase start -x studio,imgproxy,mailpit,logflare,vector,realtime,postgres-meta 2>&1 | tee start.log
           code=${PIPESTATUS[0]}
           if [ "$code" -ne 0 ]; then
             message=$(grep -iE 'error|failed|at statement|line [0-9]+' start.log | head -30 | sed ':a;N;$!ba;s/\n/%0A/g')

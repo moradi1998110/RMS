@@ -144,6 +144,30 @@ expect "deactivation cannot bypass the function" "$STATUS" "403"
 rest "$employee_token" PATCH "profiles?id=eq.$employee_id" '{"must_change_password":false}'
 expect "an employee cannot clear the flag directly" "$STATUS" "403"
 
+echo "# Meal images"
+# upload <token> <folder> <file> <content type>: prints the HTTP status.
+upload() {
+  curl -sS -o /dev/null -w '%{http_code}' -X POST "$API_URL/storage/v1/object/meal-images/$2/$(basename "$3")" \
+    -H "apikey: $ANON_KEY" -H "Authorization: Bearer $1" -H "Content-Type: $4" --data-binary "@$3"
+}
+image_dir="$(mktemp -d)"
+head -c 2048 /dev/urandom > "$image_dir/meal.webp"
+head -c 2048 /dev/urandom > "$image_dir/notes.txt"
+head -c 400000 /dev/urandom > "$image_dir/huge.webp"
+
+expect "a manager uploads to their own restaurant" "$(upload "$manager_token" "$restaurant_id" "$image_dir/meal.webp" image/webp)" "200"
+public_status="$(curl -sS -o /dev/null -w '%{http_code}' "$API_URL/storage/v1/object/public/meal-images/$restaurant_id/meal.webp")"
+expect "the image opens by its link" "$public_status" "200"
+
+refused() {
+  if [ "$1" = "200" ]; then echo allowed; else echo refused; fi
+}
+expect "a manager cannot upload to another restaurant" "$(refused "$(upload "$manager_token" "$site_id" "$image_dir/meal.webp" image/webp)")" "refused"
+expect "an employee cannot upload" "$(refused "$(upload "$employee_token" "$restaurant_id" "$image_dir/notes.txt" image/webp)")" "refused"
+expect "only images are accepted" "$(refused "$(upload "$manager_token" "$restaurant_id" "$image_dir/notes.txt" text/plain)")" "refused"
+expect "an oversized image is refused" "$(refused "$(upload "$manager_token" "$restaurant_id" "$image_dir/huge.webp" image/webp)")" "refused"
+rm -rf "$image_dir"
+
 echo "# Changing the password"
 new_password="$(random_password)"
 change_status="$(jq -n --arg password "$new_password" '{password: $password}' |

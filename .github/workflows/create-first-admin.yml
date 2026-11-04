@@ -1,0 +1,35 @@
+name: Create first admin
+
+# Run once by hand from the Actions tab after the first deploy. Then delete the
+# ADMIN_PASSWORD secret; the admin changes nothing else here afterwards.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  create-admin:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      SUPABASE_PROJECT_REF: ztprvcfwlzxycdjeektg
+      API_URL: https://ztprvcfwlzxycdjeektg.supabase.co
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      ADMIN_USERNAME: ${{ secrets.ADMIN_USERNAME }}
+      ADMIN_FULL_NAME: ${{ secrets.ADMIN_FULL_NAME }}
+      ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Create the admin
+        shell: bash
+        run: |
+          SERVICE_ROLE_KEY="$(supabase projects api-keys --project-ref "$SUPABASE_PROJECT_REF" -o json | jq -r '.[] | select(.name == "service_role") | .api_key')"
+          echo "::add-mask::$SERVICE_ROLE_KEY"
+          export SERVICE_ROLE_KEY
+          bash scripts/bootstrap-admin.sh
