@@ -5,6 +5,12 @@ on:
     branches-ignore:
       - ci-results
       - deploy-results
+      - app-results
+    paths:
+      - "supabase/**"
+      - "scripts/**"
+      - ".github/workflows/db-tests.yml"
+      - ".github/workflows/deploy-supabase.yml"
   workflow_dispatch:
 
 permissions:
