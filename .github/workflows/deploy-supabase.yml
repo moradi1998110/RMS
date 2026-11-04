@@ -40,9 +40,9 @@ jobs:
               exit 1
             fi
             supabase link --project-ref "$SUPABASE_PROJECT_REF" &&
-            supabase db push &&
+            supabase db push --remote --yes &&
             supabase functions deploy --project-ref "$SUPABASE_PROJECT_REF" &&
-            supabase migration list
+            supabase migration list --remote
           } 2>&1 | tee deploy.log
 
       # Self sign-up is a project setting, so set exactly this one rather than
