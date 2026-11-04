@@ -1,7 +1,7 @@
 -- Database tests for wallet, booking, pickup, delegation and Ramadan rules.
 -- Run with: supabase test db
 -- Everything rolls back at the end. Simultaneous requests cannot be exercised from a
--- single transaction, so this file does not cover them.
+-- single transaction, so those are in scripts/concurrency-test.sh.
 
 begin;
 

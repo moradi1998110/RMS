@@ -45,6 +45,13 @@ jobs:
           fi
           exit "$code"
 
+      - name: Run concurrency tests
+        shell: bash
+        run: |
+          set +e
+          bash scripts/concurrency-test.sh 2>&1 | tee concurrency.log
+          exit "${PIPESTATUS[0]}"
+
       # Keeps the latest logs readable with plain git, on a branch of their own.
       - name: Publish logs
         if: always()
