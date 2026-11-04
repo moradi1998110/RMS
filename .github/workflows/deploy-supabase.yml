@@ -67,6 +67,12 @@ jobs:
         shell: bash
         run: |
           echo "${{ github.sha }} ${{ job.status }}" > result.log
+          # Refuse to publish anything that looks like a key or token.
+          if grep -lE 'add-mask|eyJ[A-Za-z0-9_-]{10,}|sb_secret_|sbp_[A-Za-z0-9]+' ./*.log; then
+            echo "A log looks like it contains a secret. Publishing only the result." >&2
+            find . -maxdepth 1 -name '*.log' ! -name result.log -delete
+            echo "logs withheld: possible secret" >> result.log
+          fi
           git config user.name "github-actions"
           git config user.email "github-actions@users.noreply.github.com"
           git switch --orphan deploy-results

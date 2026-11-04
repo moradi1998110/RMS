@@ -7,8 +7,10 @@ set -u
 keys="$(supabase projects api-keys --project-ref "$SUPABASE_PROJECT_REF" -o json)"
 ANON_KEY="$(jq -r '.[] | select(.name == "anon") | .api_key' <<< "$keys")"
 SERVICE_ROLE_KEY="$(jq -r '.[] | select(.name == "service_role") | .api_key' <<< "$keys")"
-echo "::add-mask::$ANON_KEY"
-echo "::add-mask::$SERVICE_ROLE_KEY"
+unset keys
+
+# This output is published to a branch, so nothing here may ever print a key. Masking
+# commands would not help: they print the key to the log file before the runner hides it.
 
 failures=0
 
