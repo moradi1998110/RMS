@@ -14,6 +14,9 @@ unset keys
 
 failures=0
 
+# A short one-way fingerprint shows whether a key has been rotated without revealing it.
+echo "service key fingerprint: $(printf '%s' "$SERVICE_ROLE_KEY" | sha256sum | cut -c1-16)"
+
 expect() {
   if [ "$2" = "$3" ]; then
     echo "ok   - $1"
