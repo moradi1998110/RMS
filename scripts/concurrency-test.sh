@@ -159,6 +159,29 @@ done
 expect "no booking stays open on a cancelled meal" "$all_clean" "1"
 
 # ---------------------------------------------------------------------------
+echo "# Double tap on cancelling a repeated meal: 5 separate requests at once"
+for week in 0 1 2 3; do
+  q "insert into public.meal_offerings (
+       id, meal_id, restaurant_id, service_date, period, season, price,
+       book_until, cancel_until, pickup_from, pickup_until
+     ) values (
+       md5('series$week')::uuid, md5('meal')::uuid, md5('rest')::uuid,
+       (date_trunc('month', current_date) + interval '1 month')::date + ($week * 7), 'dinner', 'normal', 1000,
+       now() + interval '1 day', now() + interval '1 day', now() + interval '2 days', now() + interval '3 days'
+     )" > /dev/null
+done
+as_user emp6 "select public.book_meals(array[md5('series0')::uuid, md5('series1')::uuid, md5('series2')::uuid, md5('series3')::uuid], gen_random_uuid())" > /dev/null
+series_before="$(q "select available from public.wallets where employee_id = md5('emp6')::uuid")"
+series_booking="$(q "select id from public.bookings where offering_id = md5('series0')::uuid and employee_id = md5('emp6')::uuid")"
+for i in 1 2 3 4 5; do
+  as_user emp6 "select public.cancel_booking_series('$series_booking', gen_random_uuid())" > "$OUT/f$i" 2>&1 &
+done
+wait
+expect "all four meals are cancelled" "$(q "select count(*) from public.bookings where employee_id = md5('emp6')::uuid and status = 'cancelled' and offering_id in (md5('series0')::uuid, md5('series1')::uuid, md5('series2')::uuid, md5('series3')::uuid)")" "4"
+expect "the refund happens once" "$(q "select available - $series_before from public.wallets where employee_id = md5('emp6')::uuid")" "4000"
+expect "one request wins" "$(cat "$OUT"/f? | grep -c '"cancelled": 4')" "1"
+
+# ---------------------------------------------------------------------------
 echo "# Final check"
 expect "every wallet matches its ledger and open bookings" "$(q "select private.check_wallet_integrity()")" "0"
 

@@ -11,7 +11,8 @@
 | `supabase/migrations/..._wallet_booking.sql` | الشحن والحجز والإلغاء |
 | `supabase/migrations/..._pickup_delegation.sql` | الاستلام والتخويل وتسوية الوجبات غير المستلمة |
 | `supabase/migrations/..._scheduling_jobs.sql` | توليد الوجبات ورمضان والمهام الدورية |
-| `supabase/tests/core.test.sql` | اختبارات pgTAP |
+| `supabase/migrations/..._series_cancel_and_horizon.sql` | الإلغاء المتكرر، والنشر حتى نهاية الشهر التالي، ومتابعة تعديلات المدير |
+| `supabase/tests/` | اختبارات pgTAP |
 
 ## التشغيل
 
