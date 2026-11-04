@@ -1,1 +1,15 @@
 project_id = "rms"
+
+# Accounts are created only by an admin. Password sign-in stays on.
+[auth]
+enable_signup = false
+
+# These functions check the caller themselves, and return their own 401 and 403.
+[functions.create-user]
+verify_jwt = false
+
+[functions.reset-password]
+verify_jwt = false
+
+[functions.set-user-active]
+verify_jwt = false

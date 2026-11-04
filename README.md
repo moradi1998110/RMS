@@ -31,6 +31,14 @@ supabase db reset
 supabase test db
 ```
 
+## الحسابات
+
+- **أول أدمن:** يُنشأ مرة واحدة بالسكربت `scripts/bootstrap-admin.sh`، وتمرَّر قيمه عبر متغيرات البيئة ولا تُحفظ في الريبو. وبعده ينشئ الأدمن بقية الحسابات من التطبيق.
+- **الدوال:** `create-user` و`reset-password` و`set-user-active`. وكلها للأدمن فقط، وتُرجع `create-user` و`reset-password` كلمة المرور المؤقتة مرة واحدة دون تخزينها.
+- **تسجيل الدخول:** يكتب المستخدم اسمه فقط، ويحوّله التطبيق إلى `username@meals.invalid` قبل إرساله إلى Supabase Auth.
+- **كلمة المرور المؤقتة:** إذا كان `must_change_password` مفعّلاً، يعرض التطبيق شاشة تغيير كلمة المرور، ثم يستدعي `mark_password_changed`.
+- **الإنتاج:** يجب إيقاف التسجيل الذاتي في مشروع Supabase أيضاً، لأن `supabase/config.toml` لا يُطبَّق عليه إلا عبر `supabase config push`.
+
 ## للتطبيق: أخطاء الدوال
 
 كل رفض يأتي برمز خطأ `P0001`، و`message` رمز ثابت مثل `insufficient_balance`، و`details` فيه تفاصيل بصيغة JSON مثل `shortfall`. ويحوّل التطبيق هذه الرموز إلى جمل عربية.

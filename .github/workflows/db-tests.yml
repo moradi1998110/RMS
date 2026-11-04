@@ -26,7 +26,7 @@ jobs:
         shell: bash
         run: |
           set +e
-          supabase start -x studio,imgproxy,mailpit,logflare,vector,edge-runtime,realtime,storage-api,postgres-meta 2>&1 | tee start.log
+          supabase start -x studio,imgproxy,mailpit,logflare,vector,realtime,storage-api,postgres-meta 2>&1 | tee start.log
           code=${PIPESTATUS[0]}
           if [ "$code" -ne 0 ]; then
             message=$(grep -iE 'error|failed|at statement|line [0-9]+' start.log | head -30 | sed ':a;N;$!ba;s/\n/%0A/g')
@@ -52,6 +52,22 @@ jobs:
         run: |
           set +e
           bash scripts/concurrency-test.sh 2>&1 | tee concurrency.log
+          exit "${PIPESTATUS[0]}"
+
+      - name: Run account tests
+        if: ${{ !cancelled() && steps.migrations.outcome == 'success' }}
+        shell: bash
+        run: |
+          set +e
+          supabase functions serve > functions.log 2>&1 &
+          url="$(supabase status -o env | grep '^API_URL=' | cut -d'"' -f2)/functions/v1/create-user"
+          for attempt in $(seq 1 60); do
+            status="$(curl -s -o /dev/null -w '%{http_code}' -X POST "$url")"
+            [ "$status" = "401" ] && break
+            sleep 3
+          done
+          echo "functions answered with $status after $attempt attempts"
+          bash scripts/accounts-test.sh 2>&1 | tee accounts.log
           exit "${PIPESTATUS[0]}"
 
       # Keeps the latest logs readable with plain git, on a branch of their own.
