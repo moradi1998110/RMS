@@ -46,7 +46,9 @@ create function test_util.booking(p_employee text, p_offering text) returns uuid
 language sql security definer set search_path = public as $$
   select id from public.bookings
   where employee_id = test_util.id(p_employee) and offering_id = test_util.id(p_offering)
-  order by created_at desc, id limit 1;
+  -- now() is fixed inside this transaction, so created_at cannot tell a rebooking
+  -- from the cancelled booking before it. Prefer the one that is not cancelled.
+  order by status in ('cancelled', 'cancelled_by_restaurant'), id limit 1;
 $$;
 
 create function test_util.status(p_employee text, p_offering text) returns text

@@ -22,6 +22,7 @@ jobs:
 
       # Starting Supabase applies every migration, so a broken migration fails here.
       - name: Apply migrations
+        id: migrations
         shell: bash
         run: |
           set +e
@@ -46,6 +47,7 @@ jobs:
           exit "$code"
 
       - name: Run concurrency tests
+        if: ${{ !cancelled() && steps.migrations.outcome == 'success' }}
         shell: bash
         run: |
           set +e
