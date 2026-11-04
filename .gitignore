@@ -1,0 +1,8 @@
+# Supabase local state
+supabase/.branches/
+supabase/.temp/
+
+# Secrets
+.env
+.env.*
+!.env.example
