@@ -41,7 +41,7 @@ jobs:
             fi
             supabase link --project-ref "$SUPABASE_PROJECT_REF" &&
             supabase db push --remote --yes &&
-            supabase functions deploy --project-ref "$SUPABASE_PROJECT_REF" &&
+            supabase functions deploy --remote="$SUPABASE_PROJECT_REF" --yes &&
             supabase migration list --remote
           } 2>&1 | tee deploy.log
 
