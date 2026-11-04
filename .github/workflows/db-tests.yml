@@ -1,0 +1,44 @@
+name: Database tests
+
+on:
+  push:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  db-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      # Starting Supabase applies every migration, so a broken migration fails here.
+      - name: Apply migrations
+        shell: bash
+        run: |
+          set +e
+          supabase start -x studio,imgproxy,mailpit,logflare,vector,edge-runtime,realtime,storage-api,postgres-meta 2>&1 | tee start.log
+          code=${PIPESTATUS[0]}
+          if [ "$code" -ne 0 ]; then
+            message=$(grep -iE 'error|failed|at statement|line [0-9]+' start.log | head -30 | sed ':a;N;$!ba;s/\n/%0A/g')
+            echo "::error title=Migrations failed::$message"
+          fi
+          exit "$code"
+
+      - name: Run tests
+        shell: bash
+        run: |
+          set +e
+          supabase test db 2>&1 | tee test.log
+          code=${PIPESTATUS[0]}
+          if [ "$code" -ne 0 ]; then
+            message=$(grep -E 'not ok|Failed test|have:|want:|caught:|wanted:|ERROR|Dubious|Result:' test.log | head -80 | sed ':a;N;$!ba;s/\n/%0A/g')
+            echo "::error title=Tests failed::$message"
+          fi
+          exit "$code"

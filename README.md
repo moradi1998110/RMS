@@ -15,11 +15,9 @@
 
 ## التشغيل
 
-يحتاج إلى Docker و[Supabase CLI](https://supabase.com/docs/guides/cli):
+تعمل الاختبارات تلقائياً على GitHub Actions مع كل رفع إلى الريبو.
 
-```bash
-supabase init
-```
+وللتشغيل على جهازك، تحتاج إلى Docker و[Supabase CLI](https://supabase.com/docs/guides/cli):
 
 ```bash
 supabase start
