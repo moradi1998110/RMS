@@ -18,13 +18,15 @@ class MealsTab extends ConsumerWidget {
   Future<void> _open(BuildContext context, [ManagerMeal? meal]) async {
     final saved = await showAppSheet<bool>(context, builder: (_) => MealSheet(meal: meal));
     if (saved != true || !context.mounted) return;
-    await showNotice(context, kind: NoticeKind.done, title: meal == null ? 'أُضيفت الوجبة' : 'حُفظت الوجبة');
+    await showNotice(context, kind: NoticeKind.done, title: meal == null ? 'أُضيفت الوجبة' : 'حُفظت الوجبة', text: meal == null ? 'أضفها إلى البرنامج لتظهر للموظفين.' : null);
   }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final meals = ref.watch(mealsProvider);
     final value = meals.valueOrNull;
+    final scheduled = {for (final row in ref.watch(schedulesProvider).valueOrNull ?? const <ScheduleRow>[]) row.mealId};
+    final schedulesLoaded = ref.watch(schedulesProvider).hasValue;
     if (value == null) {
       return LoadingOrError(error: meals.error, onRetry: () => ref.invalidate(mealsProvider));
     }
@@ -42,7 +44,7 @@ class MealsTab extends ConsumerWidget {
           const SizedBox(height: 12),
           if (value.isEmpty) const Text('لا توجد وجبات بعد. ابدأ بإضافة أول وجبة.', style: TextStyle(fontSize: 18)),
           for (final meal in value) ...[
-            _MealCard(meal: meal, imageUrl: meal.imagePath == null ? null : ref.read(managerRepositoryProvider).imageUrl(meal.imagePath!), onEdit: () => _open(context, meal)),
+            _MealCard(meal: meal, unscheduled: schedulesLoaded && meal.isActive && !scheduled.contains(meal.id), imageUrl: meal.imagePath == null ? null : ref.read(managerRepositoryProvider).imageUrl(meal.imagePath!), onEdit: () => _open(context, meal)),
             const SizedBox(height: 12),
           ],
         ],
@@ -52,10 +54,11 @@ class MealsTab extends ConsumerWidget {
 }
 
 class _MealCard extends StatelessWidget {
-  const _MealCard({required this.meal, required this.imageUrl, required this.onEdit});
+  const _MealCard({required this.meal, required this.unscheduled, required this.imageUrl, required this.onEdit});
 
   final ManagerMeal meal;
   final String? imageUrl;
+  final bool unscheduled;
   final VoidCallback onEdit;
 
   @override
@@ -94,6 +97,8 @@ class _MealCard extends StatelessWidget {
                   ],
                 ),
                 Text(meal.extras.isEmpty ? 'بدون إضافات' : 'معها: ${meal.extras.join('، ')}', style: const TextStyle(fontSize: 17, color: AppColors.inkMuted)),
+                if (unscheduled)
+                  const Text('غير مجدولة: لا تظهر للموظفين حتى تضيفها إلى البرنامج', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: AppColors.onWarningSoft)),
                 if (!meal.isActive)
                   const Text('موقوفة: لا تُعرض للموظفين', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: AppColors.onDangerSoft)),
                 const SizedBox(height: 8),

@@ -108,6 +108,8 @@ Future<void> _closeNotice(WidgetTester tester) async {
 }
 
 void main() {
+  bookingScenarios();
+
   group('wording', () {
     test('money is grouped', () {
       expect(money(0), '0');
@@ -486,6 +488,90 @@ void main() {
       expect(find.text('+70,000'), findsOneWidget);
       expect(find.text('حجز رز'), findsOneWidget);
       expect(find.text('-6,000'), findsOneWidget);
+    });
+  });
+}
+
+/// The real restaurant's week: Saturday has all three meals, Thursday only dinner.
+void bookingScenarios() {
+  group('booking scenarios', () {
+    DateTime nextWeekday(int weekday, {int weeksAhead = 0}) {
+      var day = addDays(dayOf(DateTime.now()), 1);
+      while (day.weekday != weekday) {
+        day = addDays(day, 1);
+      }
+      return addDays(day, 7 * weeksAhead);
+    }
+
+    List<Offering> program() {
+      final offerings = <Offering>[];
+      for (var week = 0; week < 8; week++) {
+        final thursday = nextWeekday(DateTime.thursday, weeksAhead: week);
+        final saturday = nextWeekday(DateTime.saturday, weeksAhead: week);
+        offerings.addAll([
+          _offering('thu$week', thursday, mealId: 'burger', name: 'برغر', period: MealPeriod.dinner),
+          _offering('satb$week', saturday, mealId: 'eggs', name: 'بيض', period: MealPeriod.breakfast),
+          _offering('satl$week', saturday, mealId: 'rice', name: 'رز', period: MealPeriod.lunch),
+          _offering('satd$week', saturday, mealId: 'burger', name: 'برغر', period: MealPeriod.dinner),
+        ]);
+      }
+      return offerings..sort((a, b) => a.serviceDate.compareTo(b.serviceDate));
+    }
+
+    Future<void> pickDay(WidgetTester tester, DateTime day) async {
+      final chip = find.byKey(Key('day-chip-${isoDate(day)}'));
+      await tester.ensureVisible(chip);
+      await tester.pumpAndSettle();
+      await tester.tap(chip);
+      await tester.pumpAndSettle();
+    }
+
+    Future<void> tapAfterScroll(WidgetTester tester, String key) async {
+      final target = find.byKey(Key(key));
+      await tester.ensureVisible(target);
+      await tester.pumpAndSettle();
+      await tester.tap(target);
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('only days with meals are offered', (tester) async {
+      await _pumpPage(tester, const MealsPage(), FakeEmployeeRepository(offeringsValue: program()));
+      final monday = nextWeekday(DateTime.monday);
+      expect(find.byKey(Key('day-chip-${isoDate(monday)}')), findsNothing);
+      expect(find.byKey(Key('day-chip-${isoDate(nextWeekday(DateTime.thursday))}')), findsOneWidget);
+    });
+
+    testWidgets('every Thursday and Saturday can be opened and booked, not just the last', (tester) async {
+      for (final week in [0, 1, 2, 7]) {
+        final repository = FakeEmployeeRepository(offeringsValue: program());
+        await _pumpPage(tester, const MealsPage(), repository);
+        await pickDay(tester, nextWeekday(DateTime.thursday, weeksAhead: week));
+        expect(find.text('برغر'), findsOneWidget);
+        expect(find.text('بيض'), findsNothing);
+
+        await tapAfterScroll(tester, 'book-thu$week');
+        await tester.tap(find.byKey(const Key('book-confirm')));
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 500));
+        expect(repository.bookCalls.single.$1, ['thu$week']);
+        await _closeNotice(tester);
+        await tester.pumpWidget(const SizedBox());
+      }
+    });
+
+    testWidgets('a Saturday shows all three periods', (tester) async {
+      await _pumpPage(tester, const MealsPage(), FakeEmployeeRepository(offeringsValue: program()));
+      await pickDay(tester, nextWeekday(DateTime.saturday, weeksAhead: 1));
+      expect(find.text('بيض'), findsOneWidget);
+      expect(find.text('رز'), findsOneWidget);
+    });
+
+    testWidgets('a closed meal says when booking ended, an open one until when', (tester) async {
+      final day = nextWeekday(DateTime.thursday);
+      await _pumpPage(tester, const MealsPage(), FakeEmployeeRepository(offeringsValue: [
+        _offering('late', day, mealId: 'a', bookUntil: DateTime(day.year, day.month, day.day, 12)),
+      ]));
+      expect(find.textContaining('آخر حجز'), findsOneWidget);
     });
   });
 }

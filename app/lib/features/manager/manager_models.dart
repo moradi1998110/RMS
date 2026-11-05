@@ -228,11 +228,23 @@ class TimeRule {
 
   static int _minutes(int day, TimeOfDay time) => day * 1440 + time.hour * 60 + time.minute;
 
-  /// Same rule as the server and the table constraints.
-  bool get isValid =>
-      _minutes(bookDay, book) <= _minutes(fromDay, from) &&
-      _minutes(cancelDay, cancel) <= _minutes(fromDay, from) &&
-      _minutes(fromDay, from) < _minutes(untilDay, until);
+  /// Names the time at fault, in the same order the server and table constraints check.
+  String? get problem {
+    String at(int day, TimeOfDay time) => ruleText(day, time);
+    final start = at(fromDay, from);
+    if (_minutes(bookDay, book) > _minutes(fromDay, from)) {
+      return 'آخر حجز (${at(bookDay, book)}) يأتي بعد بدء الاستلام ($start). اجعله قبله.';
+    }
+    if (_minutes(cancelDay, cancel) > _minutes(fromDay, from)) {
+      return 'آخر إلغاء (${at(cancelDay, cancel)}) يأتي بعد بدء الاستلام ($start). اجعله قبله.';
+    }
+    if (_minutes(fromDay, from) >= _minutes(untilDay, until)) {
+      return 'آخر استلام (${at(untilDay, until)}) يجب أن يأتي بعد بدء الاستلام ($start).';
+    }
+    return null;
+  }
+
+  bool get isValid => problem == null;
 }
 
 /// A day offset and a time as a sentence, told from the day of the meal.

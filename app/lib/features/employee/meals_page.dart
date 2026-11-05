@@ -43,8 +43,8 @@ class MealsPage extends ConsumerWidget {
 
     final now = DateTime.now();
     final today = dayOf(now);
-    final last = offeringsValue.isEmpty || offeringsValue.last.serviceDate.isBefore(today) ? today : offeringsValue.last.serviceDate;
-    final days = [for (var day = today; !day.isAfter(last); day = addDays(day, 1)) day];
+    // Only days with meals, so nobody lands on an empty day and thinks booking is broken.
+    final days = {today, for (final offering in offeringsValue) offering.serviceDate}.toList()..sort();
 
     // Opens on the first day that still has something to book.
     final firstOpen = offeringsValue.where((offering) => offering.isOpenAt(now)).firstOrNull?.serviceDate ?? today;
@@ -80,7 +80,7 @@ class MealsPage extends ConsumerWidget {
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 32),
               child: Text(
-                offeringsValue.isEmpty ? 'لم يُنشر برنامج الوجبات بعد.' : 'لا توجد وجبات في هذا اليوم.',
+                offeringsValue.isEmpty ? 'لم يُنشر برنامج الوجبات بعد.' : 'لا توجد وجبات اليوم. اختر يوماً آخر من الأعلى.',
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: AppColors.inkMuted),
               ),
@@ -231,7 +231,7 @@ class _DayStripState extends State<_DayStrip> {
             Padding(
               key: day == widget.selected ? _selectedKey : null,
               padding: const EdgeInsetsDirectional.only(end: 8),
-              child: _DayChip(label: _label(day), number: day.day, selected: day == widget.selected, onTap: () => widget.onPick(day)),
+              child: _DayChip(key: Key('day-chip-${isoDate(day)}'), label: _label(day), number: day.day, selected: day == widget.selected, onTap: () => widget.onPick(day)),
             ),
         ],
       ),
@@ -240,7 +240,7 @@ class _DayStripState extends State<_DayStrip> {
 }
 
 class _DayChip extends StatelessWidget {
-  const _DayChip({required this.label, required this.number, required this.selected, required this.onTap});
+  const _DayChip({super.key, required this.label, required this.number, required this.selected, required this.onTap});
 
   final String label;
   final int number;
@@ -352,6 +352,11 @@ class _MealCard extends StatelessWidget {
                   const SizedBox(height: 6),
                   Text('معها: ${offering.extras.join(' و')}', style: textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500)),
                 ],
+                const SizedBox(height: 8),
+                Text(
+                  "${now.isBefore(offering.bookUntil) ? 'آخر حجز' : 'كان آخر حجز'}: ${deadlineText(offering.bookUntil, offering.serviceDate)}",
+                  style: textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500),
+                ),
                 const SizedBox(height: 10),
                 _action(),
               ],

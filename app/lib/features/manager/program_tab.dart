@@ -399,8 +399,9 @@ class _RuleSheetState extends ConsumerState<_RuleSheet> {
       untilDay: _untilDay,
       until: _until,
     );
-    if (!rule.isValid) {
-      setState(() => _error = timesRule);
+    final problem = rule.problem;
+    if (problem != null) {
+      setState(() => _error = problem);
       return;
     }
     setState(() {

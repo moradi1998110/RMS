@@ -432,7 +432,7 @@ void main() {
       await _tapKey(tester, 'edit-times-lunch');
       await _tapKey(tester, 'from-previous');
       await _tapKey(tester, 'times-save');
-      expect(find.text(timesRule), findsOneWidget);
+      expect(find.textContaining('يأتي بعد بدء الاستلام'), findsOneWidget);
       expect(repository.savedRule, isNull);
 
       await _tapKey(tester, 'from-same');
