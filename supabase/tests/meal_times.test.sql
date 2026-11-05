@@ -103,9 +103,10 @@ $q$, '23514', null, 'a schedule cannot set only some of the times');
 
 select lives_ok($q$ select public.publish_schedule() $q$, 'publish the schedule');
 
-select is(test_util.cancel_until('breakfast', 3), test_util.local_at(2, '22:00'), 'breakfast: cancel closes at 22:00 the night before');
-select is(test_util.cancel_until('lunch', 3), test_util.local_at(3, '08:00'), 'lunch: cancel closes at 08:00 the same day');
-select is(test_util.cancel_until('dinner', 3), test_util.local_at(3, '14:00'), 'dinner: cancel closes at 14:00 the same day');
+select is(test_util.cancel_until('breakfast', 3), test_util.local_at(3, '05:00'), 'breakfast: closes at 05:00 the same day');
+select is((select book_until from public.meal_offerings where id = test_util.offering('breakfast', 3)), test_util.local_at(3, '05:00'), 'booking closes at the same hour');
+select is(test_util.cancel_until('lunch', 3), test_util.local_at(3, '10:00'), 'lunch: closes at 10:00 the same day');
+select is(test_util.cancel_until('dinner', 3), test_util.local_at(3, '16:00'), 'dinner: closes at 16:00 the same day');
 select is(test_util.cancel_until('late_dinner', 3), test_util.local_at(3, '15:00'), 'a schedule with its own times keeps them');
 
 -- ---------------------------------------------------------------------------
@@ -153,8 +154,8 @@ select throws_ok($q$ select public.set_meal_times('lunch', -1, '20:00', 0, '13:0
 
 select lives_ok($q$ select public.set_meal_times('lunch', -1, '20:00', 0, '09:00', 0, '12:00', 0, '14:30') $q$, 'the manager moves lunch to 09:00');
 select is(test_util.cancel_until('lunch', 3), test_util.local_at(3, '09:00'), 'a lunch with no bookings follows the new rule');
-select is(test_util.cancel_until('lunch', 4), test_util.local_at(4, '08:00'), 'a booked lunch keeps the deadline already agreed');
-select is(test_util.cancel_until('breakfast', 5), test_util.local_at(4, '22:00'), 'changing lunch does not touch breakfast');
+select is(test_util.cancel_until('lunch', 4), test_util.local_at(4, '10:00'), 'a booked lunch keeps the deadline already agreed');
+select is(test_util.cancel_until('breakfast', 5), test_util.local_at(5, '05:00'), 'changing lunch does not touch breakfast');
 
 select lives_ok($q$ select public.set_meal_times('dinner', 0, '12:00', 0, '13:00', 0, '18:00', 0, '20:30') $q$, 'the manager moves dinner to 13:00');
 select is(test_util.cancel_until('dinner', 5), test_util.local_at(5, '13:00'), 'dinner follows the new rule');

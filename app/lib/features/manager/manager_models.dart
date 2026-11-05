@@ -30,7 +30,7 @@ class ManagerFailure implements Exception {
       });
 }
 
-const timesRule = 'يجب أن يكون آخر حجز وآخر إلغاء قبل بدء الاستلام، وأن يبدأ الاستلام قبل نهايته.';
+const timesRule = 'يجب أن يكون آخر حجز وإلغاء قبل بدء الاستلام، وأن يبدأ الاستلام قبل نهايته.';
 
 class ManagerMeal {
   const ManagerMeal({
@@ -228,18 +228,15 @@ class TimeRule {
 
   static int _minutes(int day, TimeOfDay time) => day * 1440 + time.hour * 60 + time.minute;
 
-  /// Names the time at fault, in the same order the server and table constraints check.
+  /// Names the time at fault. Booking and cancelling stop before pickup starts, leaving
+  /// the restaurant time to count and prepare.
   String? get problem {
-    String at(int day, TimeOfDay time) => ruleText(day, time);
-    final start = at(fromDay, from);
-    if (_minutes(bookDay, book) > _minutes(fromDay, from)) {
-      return 'آخر حجز (${at(bookDay, book)}) يأتي بعد بدء الاستلام ($start). اجعله قبله.';
-    }
-    if (_minutes(cancelDay, cancel) > _minutes(fromDay, from)) {
-      return 'آخر إلغاء (${at(cancelDay, cancel)}) يأتي بعد بدء الاستلام ($start). اجعله قبله.';
+    final start = ruleText(fromDay, from);
+    if (_minutes(bookDay, book) >= _minutes(fromDay, from)) {
+      return 'آخر حجز وإلغاء (${ruleText(bookDay, book)}) يجب أن يكون قبل بدء الاستلام ($start).';
     }
     if (_minutes(fromDay, from) >= _minutes(untilDay, until)) {
-      return 'آخر استلام (${at(untilDay, until)}) يجب أن يأتي بعد بدء الاستلام ($start).';
+      return 'آخر استلام (${ruleText(untilDay, until)}) يجب أن يكون بعد بدء الاستلام ($start).';
     }
     return null;
   }

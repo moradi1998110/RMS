@@ -26,10 +26,10 @@ import 'fake_employee_repository.dart';
 const _rice = ManagerMeal(id: 'm1', name: 'رز ودجاج', price: 6000, hasSalad: true, hasJuice: true);
 const _rule = TimeRule(
   period: MealPeriod.lunch,
-  bookDay: -1,
-  book: TimeOfDay(hour: 20, minute: 0),
+  bookDay: 0,
+  book: TimeOfDay(hour: 10, minute: 0),
   cancelDay: 0,
-  cancel: TimeOfDay(hour: 8, minute: 0),
+  cancel: TimeOfDay(hour: 10, minute: 0),
   fromDay: 0,
   from: TimeOfDay(hour: 12, minute: 0),
   untilDay: 0,
@@ -235,9 +235,10 @@ void main() {
             untilDay: _rule.untilDay,
             until: _rule.until,
           );
-      expect(withFrom(0, 7).isValid, isFalse); // before the cancel deadline
+      expect(withFrom(0, 7).isValid, isFalse); // before booking stops
       expect(withFrom(0, 15).isValid, isFalse); // after pickup ends
-      expect(withFrom(0, 8).isValid, isTrue);
+      expect(withFrom(0, 10).isValid, isFalse); // leaves no time to prepare
+      expect(withFrom(0, 11).isValid, isTrue);
     });
 
     test('rule times read from the day of the meal', () {
@@ -425,22 +426,66 @@ void main() {
       expect(repository.removed?.$2, 1);
     });
 
-    testWidgets('edits times, and refuses them out of order', (tester) async {
+    testWidgets('one hour stops booking and cancelling together', (tester) async {
       final repository = FakeManagerRepository();
       await _pumpPage(tester, const ProgramTab(), repository);
-      expect(find.text('آخر إلغاء: 8:00 صباحاً يوم الوجبة'), findsOneWidget);
+      expect(find.text('آخر حجز وإلغاء: 10:00 صباحاً يوم الوجبة'), findsOneWidget);
       await _tapKey(tester, 'edit-times-lunch');
-      await _tapKey(tester, 'from-previous');
-      await _tapKey(tester, 'times-save');
-      expect(find.textContaining('يأتي بعد بدء الاستلام'), findsOneWidget);
-      expect(repository.savedRule, isNull);
-
-      await _tapKey(tester, 'from-same');
+      expect(find.byKey(const Key('book-previous')), findsNothing);
+      expect(find.byKey(const Key('cancel-time')), findsNothing);
       await tester.tap(find.byKey(const Key('times-save')));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 500));
-      expect(repository.savedRule?.fromDay, 0);
+      expect(repository.savedRule?.book, const TimeOfDay(hour: 10, minute: 0));
+      expect(repository.savedRule?.cancel, repository.savedRule?.book);
+      expect(repository.savedRule?.bookDay, 0);
+      expect(repository.savedRule?.cancelDay, 0);
       expect(find.text('تغيّرت 4 وجبة، وبقيت 2 محجوزة على موعدها.'), findsOneWidget);
+      await _closeNotice(tester);
+    });
+
+    testWidgets('an hour after pickup starts is refused by name', (tester) async {
+      const late = TimeRule(
+        period: MealPeriod.lunch,
+        bookDay: 0,
+        book: TimeOfDay(hour: 13, minute: 0),
+        cancelDay: 0,
+        cancel: TimeOfDay(hour: 13, minute: 0),
+        fromDay: 0,
+        from: TimeOfDay(hour: 12, minute: 0),
+        untilDay: 0,
+        until: TimeOfDay(hour: 14, minute: 30),
+      );
+      final repository = FakeManagerRepository(rulesValue: const [late]);
+      await _pumpPage(tester, const ProgramTab(), repository);
+      await _tapKey(tester, 'edit-times-lunch');
+      await _tapKey(tester, 'times-save');
+      expect(find.text('آخر حجز وإلغاء (1:00 ظهراً يوم الوجبة) يجب أن يكون قبل بدء الاستلام (12:00 ظهراً يوم الوجبة).'), findsOneWidget);
+      expect(repository.savedRule, isNull);
+    });
+
+    testWidgets('suhoor keeps its hour on the night it is collected', (tester) async {
+      const suhoor = TimeRule(
+        period: MealPeriod.suhoor,
+        bookDay: -1,
+        book: TimeOfDay(hour: 19, minute: 0),
+        cancelDay: -1,
+        cancel: TimeOfDay(hour: 19, minute: 0),
+        fromDay: -1,
+        from: TimeOfDay(hour: 21, minute: 0),
+        untilDay: -1,
+        until: TimeOfDay(hour: 23, minute: 30),
+      );
+      final repository = FakeManagerRepository(rulesValue: const [suhoor]);
+      await _pumpPage(tester, const ProgramTab(), repository);
+      await _tapKey(tester, 'season-ramadan');
+      await _tapKey(tester, 'edit-times-suhoor');
+      await tester.tap(find.byKey(const Key('times-save')));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
+      expect(repository.savedRule?.bookDay, -1);
+      expect(repository.savedRule?.cancelDay, -1);
+      expect(repository.savedRule?.fromDay, -1);
       await _closeNotice(tester);
     });
   });

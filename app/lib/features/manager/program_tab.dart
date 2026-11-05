@@ -302,7 +302,7 @@ class _ScheduleSheetState extends ConsumerState<_ScheduleSheet> {
           ),
           if (rule != null) ...[
             const SizedBox(height: 12),
-            FactBox(lines: [('الأوقات تلقائية: آخر إلغاء', ruleText(rule.cancelDay, rule.cancel))]),
+            FactBox(lines: [('الأوقات تلقائية: آخر حجز وإلغاء', ruleText(rule.bookDay, rule.book))]),
           ],
           if (_error != null) ...[
             const SizedBox(height: 12),
@@ -353,8 +353,7 @@ class _RuleCard extends StatelessWidget {
         children: [
           Text(rule.period.label, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700)),
           const SizedBox(height: 4),
-          Text('آخر حجز: ${ruleText(rule.bookDay, rule.book)}', style: const TextStyle(fontSize: 17)),
-          Text('آخر إلغاء: ${ruleText(rule.cancelDay, rule.cancel)}', style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700)),
+          Text('آخر حجز وإلغاء: ${ruleText(rule.bookDay, rule.book)}', style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700)),
           Text('بدء الاستلام: ${ruleText(rule.fromDay, rule.from)}', style: const TextStyle(fontSize: 17)),
           Text('آخر استلام: ${ruleText(rule.untilDay, rule.until)}', style: const TextStyle(fontSize: 17)),
           const SizedBox(height: 8),
@@ -375,13 +374,8 @@ class _RuleSheet extends ConsumerStatefulWidget {
 }
 
 class _RuleSheetState extends ConsumerState<_RuleSheet> {
-  late var _bookDay = widget.rule.bookDay;
   late var _book = widget.rule.book;
-  late var _cancelDay = widget.rule.cancelDay;
-  late var _cancel = widget.rule.cancel;
-  late var _fromDay = widget.rule.fromDay;
   late var _from = widget.rule.from;
-  late var _untilDay = widget.rule.untilDay;
   late var _until = widget.rule.until;
   bool _busy = false;
   String? _error;
@@ -390,13 +384,13 @@ class _RuleSheetState extends ConsumerState<_RuleSheet> {
     if (_busy) return;
     final rule = TimeRule(
       period: widget.rule.period,
-      bookDay: _bookDay,
+      bookDay: widget.rule.fromDay,
       book: _book,
-      cancelDay: _cancelDay,
-      cancel: _cancel,
-      fromDay: _fromDay,
+      cancelDay: widget.rule.fromDay,
+      cancel: _book,
+      fromDay: widget.rule.fromDay,
       from: _from,
-      untilDay: _untilDay,
+      untilDay: widget.rule.untilDay,
       until: _until,
     );
     final problem = rule.problem;
@@ -433,10 +427,9 @@ class _RuleSheetState extends ConsumerState<_RuleSheet> {
         children: [
           Text('أوقات ${widget.rule.period.label}', style: Theme.of(context).textTheme.titleLarge),
           const SizedBox(height: 12),
-          _TimeField(keyName: 'book', label: 'آخر حجز', day: _bookDay, time: _book, onDay: (day) => setState(() => _bookDay = day), onTime: (time) => setState(() => _book = time)),
-          _TimeField(keyName: 'cancel', label: 'آخر إلغاء', day: _cancelDay, time: _cancel, onDay: (day) => setState(() => _cancelDay = day), onTime: (time) => setState(() => _cancel = time)),
-          _TimeField(keyName: 'from', label: 'بدء الاستلام', day: _fromDay, time: _from, onDay: (day) => setState(() => _fromDay = day), onTime: (time) => setState(() => _from = time)),
-          _TimeField(keyName: 'until', label: 'آخر استلام', day: _untilDay, time: _until, onDay: (day) => setState(() => _untilDay = day), onTime: (time) => setState(() => _until = time)),
+          _TimeField(keyName: 'book', label: 'آخر حجز وإلغاء لوجبات كل يوم', time: _book, onTime: (time) => setState(() => _book = time)),
+          _TimeField(keyName: 'from', label: 'بدء الاستلام', time: _from, onTime: (time) => setState(() => _from = time)),
+          _TimeField(keyName: 'until', label: 'آخر استلام', time: _until, onTime: (time) => setState(() => _until = time)),
           const Text(
             'تتغير فوراً الوجبات التي لا حجوزات عليها. أما المحجوزة فتبقى على موعدها الذي وافق عليه أصحابها.',
             style: TextStyle(fontSize: 17, color: AppColors.inkMuted),
@@ -460,13 +453,11 @@ class _RuleSheetState extends ConsumerState<_RuleSheet> {
 }
 
 class _TimeField extends StatelessWidget {
-  const _TimeField({required this.keyName, required this.label, required this.day, required this.time, required this.onDay, required this.onTime});
+  const _TimeField({required this.keyName, required this.label, required this.time, required this.onTime});
 
   final String keyName;
   final String label;
-  final int day;
   final TimeOfDay time;
-  final ValueChanged<int> onDay;
   final ValueChanged<TimeOfDay> onTime;
 
   @override
@@ -477,14 +468,6 @@ class _TimeField extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(label, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
-          const SizedBox(height: 6),
-          Row(
-            children: [
-              Expanded(child: ChoiceBox(key: Key('$keyName-previous'), label: 'اليوم السابق', center: true, selected: day == -1, onTap: () => onDay(-1))),
-              const SizedBox(width: 6),
-              Expanded(child: ChoiceBox(key: Key('$keyName-same'), label: 'يوم الوجبة', center: true, selected: day == 0, onTap: () => onDay(0))),
-            ],
-          ),
           const SizedBox(height: 6),
           OutlinedButton(
             key: Key('$keyName-time'),
