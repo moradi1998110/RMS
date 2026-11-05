@@ -48,7 +48,7 @@ jobs:
           git checkout -- .
           rm -f test/widget_test.dart
           manifest=android/app/src/main/AndroidManifest.xml
-          sed -i 's|<manifest xmlns:android="http://schemas.android.com/apk/res/android">|&\n    <uses-permission android:name="android.permission.INTERNET"/>|' "$manifest"
+          sed -i 's|<manifest xmlns:android="http://schemas.android.com/apk/res/android">|&\n    <uses-permission android:name="android.permission.INTERNET"/>\n    <uses-permission android:name="android.permission.CAMERA"/>|' "$manifest"
           sed -i 's|android:label="[^"]*"|android:label="وجبات الموظفين"|' "$manifest"
           grep -q 'android.permission.INTERNET' "$manifest"
 

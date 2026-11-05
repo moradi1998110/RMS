@@ -6,6 +6,7 @@ import '../../core/theme.dart';
 import '../../shared/app_sheet.dart';
 import '../../shared/notice.dart';
 import 'cancel_sheet.dart';
+import 'codes_page.dart';
 import 'employee_models.dart';
 import 'employee_providers.dart';
 
@@ -436,6 +437,17 @@ class _BookingDetails extends StatelessWidget {
         Text('${clockRange(booking.pickupFrom, booking.pickupUntil)} · ${dinars(booking.amount)}', style: const TextStyle(fontSize: 17)),
         const SizedBox(height: 4),
         Text(statusText, style: TextStyle(fontSize: 17, fontWeight: FontWeight.w500, color: statusColor)),
+        if (booking.isLive) ...[
+          const SizedBox(height: 8),
+          FilledButton(
+            key: Key('codes-${booking.id}'),
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(fullscreenDialog: true, builder: (_) => CodesPage(startBookingId: booking.id)),
+            ),
+            style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(56), textStyle: const TextStyle(fontSize: 19, fontWeight: FontWeight.w700)),
+            child: const Text('اعرض الباركود'),
+          ),
+        ],
         if (booking.canCancelAt(now)) ...[
           const SizedBox(height: 8),
           OutlinedButton(

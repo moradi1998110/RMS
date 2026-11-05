@@ -6,6 +6,7 @@ import '../../core/theme.dart';
 import '../../shared/app_sheet.dart';
 import '../../shared/notice.dart';
 import 'book_sheet.dart';
+import 'codes_page.dart';
 import 'employee_models.dart';
 import 'employee_providers.dart';
 import 'employee_repository.dart';
@@ -162,6 +163,18 @@ class _NextMealCard extends StatelessWidget {
           Text(booking.mealName, style: textTheme.titleMedium?.copyWith(fontSize: 22)),
           const SizedBox(height: 4),
           Text('استلمها $pickupDay ${clockRange(booking.pickupFrom, booking.pickupUntil)}', style: textTheme.bodyMedium),
+          const SizedBox(height: 10),
+          SizedBox(
+            width: double.infinity,
+            child: FilledButton(
+              key: const Key('next-codes'),
+              onPressed: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(fullscreenDialog: true, builder: (_) => CodesPage(startBookingId: booking.id)),
+              ),
+              style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(60), textStyle: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700)),
+              child: const Text('اعرض الباركود'),
+            ),
+          ),
         ],
       ),
     );

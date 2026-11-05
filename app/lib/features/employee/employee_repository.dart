@@ -17,6 +17,7 @@ abstract class EmployeeRepository {
   Future<BookResult> book(List<String> offeringIds, String key);
   Future<CancelResult> cancel(String bookingId, String key);
   Future<CancelResult> cancelSeries(String bookingId, String key);
+  Future<List<Pickup>> pickups();
   String imageUrl(String path);
 }
 
@@ -97,6 +98,12 @@ class SupabaseEmployeeRepository implements EmployeeRepository {
   Future<CancelResult> cancelSeries(String bookingId, String key) => _guard(() async {
         final result = await _client.rpc('cancel_booking_series', params: {'p_booking_id': bookingId, 'p_key': key}) as Map<String, dynamic>;
         return CancelResult(count: (result['cancelled'] as num).toInt(), refunded: (result['refunded'] as num).toInt());
+      });
+
+  @override
+  Future<List<Pickup>> pickups() => _guard(() async {
+        final rows = await _client.rpc('my_pickups') as List;
+        return [for (final row in rows) Pickup.fromRow(row as Map<String, dynamic>)];
       });
 
   @override

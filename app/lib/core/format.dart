@@ -98,3 +98,9 @@ String mealCountObject(int count) => switch (count) {
       2 => 'وجبتين',
       _ => '$count وجبات',
     };
+
+/// The name of a day numbered as the server does: 0 = Sunday ... 6 = Saturday.
+String weekdayNameOf(int dayOfWeek) => _weekdays[dayOfWeek];
+
+/// Days of the week in calendar order, starting on Saturday.
+const weekOrder = [6, 0, 1, 2, 3, 4, 5];

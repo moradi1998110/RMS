@@ -65,6 +65,11 @@ class FakeEmployeeRepository implements EmployeeRepository {
     return const CancelResult(count: 3, refunded: 18000);
   }
 
+  List<Pickup> pickupsValue = const [];
+
+  @override
+  Future<List<Pickup>> pickups() async => pickupsValue;
+
   @override
   String imageUrl(String path) => 'https://example.invalid/$path';
 }

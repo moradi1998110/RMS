@@ -323,3 +323,37 @@ List<DateTime?> calendarCells(DateTime month) {
     for (var day = 1; day <= length; day++) DateTime(month.year, month.month, day),
   ];
 }
+
+/// One pickup code the user can show: for their own meal or a colleague's.
+class Pickup {
+  const Pickup({
+    required this.bookingId,
+    required this.token,
+    required this.shortCode,
+    required this.isMine,
+    required this.ownerName,
+    required this.mealName,
+    required this.pickupFrom,
+    required this.pickupUntil,
+  });
+
+  final String bookingId;
+  final String token;
+  final String shortCode;
+  final bool isMine;
+  final String ownerName;
+  final String mealName;
+  final DateTime pickupFrom;
+  final DateTime pickupUntil;
+
+  factory Pickup.fromRow(Map<String, dynamic> row) => Pickup(
+        bookingId: row['booking_id'] as String,
+        token: row['token'] as String,
+        shortCode: row['short_code'] as String,
+        isMine: row['is_mine'] as bool,
+        ownerName: row['owner_name'] as String,
+        mealName: row['meal_name'] as String,
+        pickupFrom: DateTime.parse(row['pickup_from'] as String).toLocal(),
+        pickupUntil: DateTime.parse(row['pickup_until'] as String).toLocal(),
+      );
+}

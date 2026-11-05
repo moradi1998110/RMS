@@ -125,3 +125,56 @@ class LoadingOrError extends StatelessWidget {
     );
   }
 }
+
+/// A selectable box: the thick border and tint show what is chosen.
+class ChoiceBox extends StatelessWidget {
+  const ChoiceBox({super.key, required this.label, this.trailing, required this.selected, required this.onTap, this.center = false});
+
+  final String label;
+  final String? trailing;
+  final bool selected;
+  final bool center;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      selected: selected,
+      button: true,
+      child: Material(
+        color: selected ? AppColors.primarySoft : AppColors.surface,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+          side: BorderSide(color: selected ? AppColors.primary : AppColors.unselected, width: 2),
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: onTap,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(minHeight: 52),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              child: Row(
+                mainAxisAlignment: center ? MainAxisAlignment.center : MainAxisAlignment.start,
+                children: [
+                  Flexible(
+                    child: Text(
+                      label,
+                      textAlign: center ? TextAlign.center : TextAlign.start,
+                      style: TextStyle(fontSize: center ? 16 : 18, fontWeight: FontWeight.w700),
+                    ),
+                  ),
+                  if (trailing != null) ...[
+                    const Spacer(),
+                    const SizedBox(width: 8),
+                    Text(trailing!, style: const TextStyle(fontSize: 17)),
+                  ],
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
