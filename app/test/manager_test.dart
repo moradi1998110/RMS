@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
@@ -170,7 +171,7 @@ class FakeManagerRepository implements ManagerRepository {
 ValueChanged<String>? _camera;
 
 Future<void> _pumpPage(WidgetTester tester, Widget page, FakeManagerRepository repository, {PhotoPicker? picker, EmployeeRepository? employee}) async {
-  tester.view.physicalSize = const Size(1170, 6000);
+  tester.view.physicalSize = const Size(1170, 12000);
   tester.view.devicePixelRatio = 3;
   addTearDown(tester.view.reset);
   await tester.pumpWidget(
@@ -323,7 +324,7 @@ void main() {
   group('meals', () {
     testWidgets('adds a meal with extras and a photo', (tester) async {
       final repository = FakeManagerRepository(mealsValue: const []);
-      final photo = Uint8List.fromList(List.filled(100, 1));
+      final photo = base64Decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==');
       await _pumpPage(tester, const MealsTab(), repository, picker: (fromCamera) async => null);
       expect(find.text('لا توجد وجبات بعد. ابدأ بإضافة أول وجبة.'), findsOneWidget);
       await tester.pumpWidget(const SizedBox());
