@@ -1,0 +1,459 @@
+{
+  "schedules": [
+    {
+      "end": null,
+      "meal": "بيض واجبان",
+      "start": "2026-11-05",
+      "active": true,
+      "period": "breakfast",
+      "repeat": "weekly",
+      "season": "normal",
+      "weekdays": [
+        6
+      ],
+      "own_times": false,
+      "restaurant": "مطعم الخاصكي",
+      "meal_active": true
+    },
+    {
+      "end": null,
+      "meal": "تمن ومرقة الفاصولية",
+      "start": "2026-11-05",
+      "active": true,
+      "period": "lunch",
+      "repeat": "weekly",
+      "season": "normal",
+      "weekdays": [
+        6
+      ],
+      "own_times": false,
+      "restaurant": "مطعم الخاصكي",
+      "meal_active": true
+    },
+    {
+      "end": null,
+      "meal": "ساندوج همبرمر",
+      "start": "2026-11-05",
+      "active": true,
+      "period": "dinner",
+      "repeat": "weekly",
+      "season": "normal",
+      "weekdays": [
+        4,
+        6
+      ],
+      "own_times": false,
+      "restaurant": "مطعم الخاصكي",
+      "meal_active": true
+    }
+  ],
+  "server_now": "2026-11-05T13:06:21.518531+00:00",
+  "time_rules": [
+    {
+      "book": "-1 20:00:00",
+      "from": "0 06:30:00",
+      "until": "0 09:00:00",
+      "cancel": "-1 22:00:00",
+      "period": "breakfast",
+      "restaurant": "مطعم الخاصكي"
+    },
+    {
+      "book": "-1 20:00:00",
+      "from": "0 12:00:00",
+      "until": "0 14:30:00",
+      "cancel": "0 08:00:00",
+      "period": "lunch",
+      "restaurant": "مطعم الخاصكي"
+    },
+    {
+      "book": "0 12:00:00",
+      "from": "0 18:00:00",
+      "until": "0 20:30:00",
+      "cancel": "0 14:00:00",
+      "period": "dinner",
+      "restaurant": "مطعم الخاصكي"
+    },
+    {
+      "book": "-1 18:00:00",
+      "from": "-1 21:00:00",
+      "until": "-1 23:30:00",
+      "cancel": "-1 20:00:00",
+      "period": "suhoor",
+      "restaurant": "مطعم الخاصكي"
+    },
+    {
+      "book": "0 10:00:00",
+      "from": "0 17:00:00",
+      "until": "0 19:30:00",
+      "cancel": "0 12:00:00",
+      "period": "iftar",
+      "restaurant": "مطعم الخاصكي"
+    }
+  ],
+  "baghdad_now": "2026-11-05T16:06:21.518531",
+  "restaurants": [
+    {
+      "name": "مطعم الخاصكي",
+      "active": true,
+      "timezone": "Asia/Baghdad"
+    }
+  ],
+  "ramadan_periods": [],
+  "bookings_by_status": {
+    "cancelled": 1
+  },
+  "offerings_by_state": [
+    {
+      "days": 8,
+      "meal": "بيض واجبان",
+      "booked": 0,
+      "period": "breakfast",
+      "season": "normal",
+      "status": "open",
+      "last_day": "2026-12-26",
+      "first_day": "2026-11-07",
+      "restaurant": "مطعم الخاصكي",
+      "bookable_now": true,
+      "cancel_reason": null
+    },
+    {
+      "days": 8,
+      "meal": "تمن ومرقة الفاصولية",
+      "booked": 0,
+      "period": "lunch",
+      "season": "normal",
+      "status": "open",
+      "last_day": "2026-12-26",
+      "first_day": "2026-11-07",
+      "restaurant": "مطعم الخاصكي",
+      "bookable_now": true,
+      "cancel_reason": null
+    },
+    {
+      "days": 1,
+      "meal": "ساندوج همبرمر",
+      "booked": 0,
+      "period": "dinner",
+      "season": "normal",
+      "status": "open",
+      "last_day": "2026-11-05",
+      "first_day": "2026-11-05",
+      "restaurant": "مطعم الخاصكي",
+      "bookable_now": false,
+      "cancel_reason": null
+    },
+    {
+      "days": 16,
+      "meal": "ساندوج همبرمر",
+      "booked": 0,
+      "period": "dinner",
+      "season": "normal",
+      "status": "open",
+      "last_day": "2026-12-31",
+      "first_day": "2026-11-07",
+      "restaurant": "مطعم الخاصكي",
+      "bookable_now": true,
+      "cancel_reason": null
+    }
+  ],
+  "recent_admin_actions": [],
+  "open_offerings_next_60_rows": [
+    {
+      "meal": "ساندوج همبرمر",
+      "period": "dinner",
+      "capacity": null,
+      "restaurant": "مطعم الخاصكي",
+      "booked_count": 0,
+      "service_date": "2026-11-05",
+      "book_until_local": "2026-11-05T12:00:00"
+    },
+    {
+      "meal": "بيض واجبان",
+      "period": "breakfast",
+      "capacity": null,
+      "restaurant": "مطعم الخاصكي",
+      "booked_count": 0,
+      "service_date": "2026-11-07",
+      "book_until_local": "2026-11-06T20:00:00"
+    },
+    {
+      "meal": "تمن ومرقة الفاصولية",
+      "period": "lunch",
+      "capacity": null,
+      "restaurant": "مطعم الخاصكي",
+      "booked_count": 0,
+      "service_date": "2026-11-07",
+      "book_until_local": "2026-11-06T20:00:00"
+    },
+    {
+      "meal": "ساندوج همبرمر",
+      "period": "dinner",
+      "capacity": null,
+      "restaurant": "مطعم الخاصكي",
+      "booked_count": 0,
+      "service_date": "2026-11-07",
+      "book_until_local": "2026-11-07T12:00:00"
+    },
+    {
+      "meal": "ساندوج همبرمر",
+      "period": "dinner",
+      "capacity": null,
+      "restaurant": "مطعم الخاصكي",
+      "booked_count": 0,
+      "service_date": "2026-11-12",
+      "book_until_local": "2026-11-12T12:00:00"
+    },
+    {
+      "meal": "بيض واجبان",
+      "period": "breakfast",
+      "capacity": null,
+      "restaurant": "مطعم الخاصكي",
+      "booked_count": 0,
+      "service_date": "2026-11-14",
+      "book_until_local": "2026-11-13T20:00:00"
+    },
+    {
+      "meal": "تمن ومرقة الفاصولية",
+      "period": "lunch",
+      "capacity": null,
+      "restaurant": "مطعم الخاصكي",
+      "booked_count": 0,
+      "service_date": "2026-11-14",
+      "book_until_local": "2026-11-13T20:00:00"
+    },
+    {
+      "meal": "ساندوج همبرمر",
+      "period": "dinner",
+      "capacity": null,
+      "restaurant": "مطعم الخاصكي",
+      "booked_count": 0,
+      "service_date": "2026-11-14",
+      "book_until_local": "2026-11-14T12:00:00"
+    },
+    {
+      "meal": "ساندوج همبرمر",
+      "period": "dinner",
+      "capacity": null,
+      "restaurant": "مطعم الخاصكي",
+      "booked_count": 0,
+      "service_date": "2026-11-19",
+      "book_until_local": "2026-11-19T12:00:00"
+    },
+    {
+      "meal": "بيض واجبان",
+      "period": "breakfast",
+      "capacity": null,
+      "restaurant": "مطعم الخاصكي",
+      "booked_count": 0,
+      "service_date": "2026-11-21",
+      "book_until_local": "2026-11-20T20:00:00"
+    },
+    {
+      "meal": "تمن ومرقة الفاصولية",
+      "period": "lunch",
+      "capacity": null,
+      "restaurant": "مطعم الخاصكي",
+      "booked_count": 0,
+      "service_date": "2026-11-21",
+      "book_until_local": "2026-11-20T20:00:00"
+    },
+    {
+      "meal": "ساندوج همبرمر",
+      "period": "dinner",
+      "capacity": null,
+      "restaurant": "مطعم الخاصكي",
+      "booked_count": 0,
+      "service_date": "2026-11-21",
+      "book_until_local": "2026-11-21T12:00:00"
+    },
+    {
+      "meal": "ساندوج همبرمر",
+      "period": "dinner",
+      "capacity": null,
+      "restaurant": "مطعم الخاصكي",
+      "booked_count": 0,
+      "service_date": "2026-11-26",
+      "book_until_local": "2026-11-26T12:00:00"
+    },
+    {
+      "meal": "بيض واجبان",
+      "period": "breakfast",
+      "capacity": null,
+      "restaurant": "مطعم الخاصكي",
+      "booked_count": 0,
+      "service_date": "2026-11-28",
+      "book_until_local": "2026-11-27T20:00:00"
+    },
+    {
+      "meal": "تمن ومرقة الفاصولية",
+      "period": "lunch",
+      "capacity": null,
+      "restaurant": "مطعم الخاصكي",
+      "booked_count": 0,
+      "service_date": "2026-11-28",
+      "book_until_local": "2026-11-27T20:00:00"
+    },
+    {
+      "meal": "ساندوج همبرمر",
+      "period": "dinner",
+      "capacity": null,
+      "restaurant": "مطعم الخاصكي",
+      "booked_count": 0,
+      "service_date": "2026-11-28",
+      "book_until_local": "2026-11-28T12:00:00"
+    },
+    {
+      "meal": "ساندوج همبرمر",
+      "period": "dinner",
+      "capacity": null,
+      "restaurant": "مطعم الخاصكي",
+      "booked_count": 0,
+      "service_date": "2026-12-03",
+      "book_until_local": "2026-12-03T12:00:00"
+    },
+    {
+      "meal": "بيض واجبان",
+      "period": "breakfast",
+      "capacity": null,
+      "restaurant": "مطعم الخاصكي",
+      "booked_count": 0,
+      "service_date": "2026-12-05",
+      "book_until_local": "2026-12-04T20:00:00"
+    },
+    {
+      "meal": "تمن ومرقة الفاصولية",
+      "period": "lunch",
+      "capacity": null,
+      "restaurant": "مطعم الخاصكي",
+      "booked_count": 0,
+      "service_date": "2026-12-05",
+      "book_until_local": "2026-12-04T20:00:00"
+    },
+    {
+      "meal": "ساندوج همبرمر",
+      "period": "dinner",
+      "capacity": null,
+      "restaurant": "مطعم الخاصكي",
+      "booked_count": 0,
+      "service_date": "2026-12-05",
+      "book_until_local": "2026-12-05T12:00:00"
+    },
+    {
+      "meal": "ساندوج همبرمر",
+      "period": "dinner",
+      "capacity": null,
+      "restaurant": "مطعم الخاصكي",
+      "booked_count": 0,
+      "service_date": "2026-12-10",
+      "book_until_local": "2026-12-10T12:00:00"
+    },
+    {
+      "meal": "بيض واجبان",
+      "period": "breakfast",
+      "capacity": null,
+      "restaurant": "مطعم الخاصكي",
+      "booked_count": 0,
+      "service_date": "2026-12-12",
+      "book_until_local": "2026-12-11T20:00:00"
+    },
+    {
+      "meal": "تمن ومرقة الفاصولية",
+      "period": "lunch",
+      "capacity": null,
+      "restaurant": "مطعم الخاصكي",
+      "booked_count": 0,
+      "service_date": "2026-12-12",
+      "book_until_local": "2026-12-11T20:00:00"
+    },
+    {
+      "meal": "ساندوج همبرمر",
+      "period": "dinner",
+      "capacity": null,
+      "restaurant": "مطعم الخاصكي",
+      "booked_count": 0,
+      "service_date": "2026-12-12",
+      "book_until_local": "2026-12-12T12:00:00"
+    },
+    {
+      "meal": "ساندوج همبرمر",
+      "period": "dinner",
+      "capacity": null,
+      "restaurant": "مطعم الخاصكي",
+      "booked_count": 0,
+      "service_date": "2026-12-17",
+      "book_until_local": "2026-12-17T12:00:00"
+    },
+    {
+      "meal": "بيض واجبان",
+      "period": "breakfast",
+      "capacity": null,
+      "restaurant": "مطعم الخاصكي",
+      "booked_count": 0,
+      "service_date": "2026-12-19",
+      "book_until_local": "2026-12-18T20:00:00"
+    },
+    {
+      "meal": "تمن ومرقة الفاصولية",
+      "period": "lunch",
+      "capacity": null,
+      "restaurant": "مطعم الخاصكي",
+      "booked_count": 0,
+      "service_date": "2026-12-19",
+      "book_until_local": "2026-12-18T20:00:00"
+    },
+    {
+      "meal": "ساندوج همبرمر",
+      "period": "dinner",
+      "capacity": null,
+      "restaurant": "مطعم الخاصكي",
+      "booked_count": 0,
+      "service_date": "2026-12-19",
+      "book_until_local": "2026-12-19T12:00:00"
+    },
+    {
+      "meal": "ساندوج همبرمر",
+      "period": "dinner",
+      "capacity": null,
+      "restaurant": "مطعم الخاصكي",
+      "booked_count": 0,
+      "service_date": "2026-12-24",
+      "book_until_local": "2026-12-24T12:00:00"
+    },
+    {
+      "meal": "بيض واجبان",
+      "period": "breakfast",
+      "capacity": null,
+      "restaurant": "مطعم الخاصكي",
+      "booked_count": 0,
+      "service_date": "2026-12-26",
+      "book_until_local": "2026-12-25T20:00:00"
+    },
+    {
+      "meal": "تمن ومرقة الفاصولية",
+      "period": "lunch",
+      "capacity": null,
+      "restaurant": "مطعم الخاصكي",
+      "booked_count": 0,
+      "service_date": "2026-12-26",
+      "book_until_local": "2026-12-25T20:00:00"
+    },
+    {
+      "meal": "ساندوج همبرمر",
+      "period": "dinner",
+      "capacity": null,
+      "restaurant": "مطعم الخاصكي",
+      "booked_count": 0,
+      "service_date": "2026-12-26",
+      "book_until_local": "2026-12-26T12:00:00"
+    },
+    {
+      "meal": "ساندوج همبرمر",
+      "period": "dinner",
+      "capacity": null,
+      "restaurant": "مطعم الخاصكي",
+      "booked_count": 0,
+      "service_date": "2026-12-31",
+      "book_until_local": "2026-12-31T12:00:00"
+    }
+  ]
+}
