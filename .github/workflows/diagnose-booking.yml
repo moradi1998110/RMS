@@ -1,0 +1,55 @@
+name: Diagnose booking
+
+# Reads the live project and changes nothing. The query holds no personal data.
+on:
+  push:
+    branches-ignore:
+      - main
+      - ci-results
+      - deploy-results
+      - app-results
+      - diagnose-results
+    paths:
+      - "scripts/diagnose-booking.sql"
+      - ".github/workflows/diagnose-booking.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write # only used to publish the report to the diagnose-results branch
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Read the live project
+        shell: bash
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+        run: |
+          jq -n --rawfile query scripts/diagnose-booking.sql '{query: $query, read_only: true}' |
+            curl -sS --fail-with-body "https://api.supabase.com/v1/projects/ztprvcfwlzxycdjeektg/database/query" \
+              -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN" \
+              -H "Content-Type: application/json" \
+              -d @- > raw.json || { cat raw.json; exit 1; }
+          jq '.[0].report' raw.json > report.log
+          rm raw.json
+
+      - name: Publish the report
+        if: always()
+        shell: bash
+        run: |
+          echo "${{ github.sha }} ${{ job.status }}" > result.log
+          if grep -lE 'add-mask|eyJ[A-Za-z0-9_-]{10,}|sb_secret_|sb_publishable_|sbp_[A-Za-z0-9]+' ./*.log; then
+            find . -maxdepth 1 -name '*.log' ! -name result.log -delete
+            echo "logs withheld: possible secret" >> result.log
+          fi
+          git config user.name "github-actions"
+          git config user.email "github-actions@users.noreply.github.com"
+          git reset -q --hard
+          git switch --orphan diagnose-results
+          git add -f ./*.log
+          git commit -q -m "Booking report for ${{ github.sha }}"
+          git push -f origin diagnose-results
