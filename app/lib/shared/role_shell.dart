@@ -15,9 +15,13 @@ class ShellPage {
 
 /// The frame for each role: name and sign-out on top, floating navigation below.
 class RoleShell extends ConsumerStatefulWidget {
-  const RoleShell({super.key, required this.pages});
+  const RoleShell({super.key, required this.pages, this.selected, this.onSelected});
 
   final List<ShellPage> pages;
+
+  /// Set these when something outside the dock also needs to change the page.
+  final int? selected;
+  final ValueChanged<int>? onSelected;
 
   @override
   ConsumerState<RoleShell> createState() => _RoleShellState();
@@ -46,6 +50,7 @@ class _RoleShellState extends ConsumerState<RoleShell> {
   Widget build(BuildContext context) {
     final status = ref.watch(authControllerProvider);
     final name = status is SignedIn ? status.profile.fullName : '';
+    final selected = widget.selected ?? _selected;
     return Scaffold(
       body: SafeArea(
         child: Stack(
@@ -65,7 +70,7 @@ class _RoleShellState extends ConsumerState<RoleShell> {
                 ),
                 Expanded(
                   child: IndexedStack(
-                    index: _selected,
+                    index: selected,
                     children: [
                       for (final page in widget.pages)
                         Padding(padding: const EdgeInsets.only(bottom: 96), child: page.child),
@@ -80,8 +85,8 @@ class _RoleShellState extends ConsumerState<RoleShell> {
               bottom: 14,
               child: FloatingDock(
                 items: [for (final page in widget.pages) page.item],
-                selected: _selected,
-                onSelected: (index) => setState(() => _selected = index),
+                selected: selected,
+                onSelected: widget.onSelected ?? (index) => setState(() => _selected = index),
               ),
             ),
           ],

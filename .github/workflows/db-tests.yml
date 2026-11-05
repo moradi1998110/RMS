@@ -77,6 +77,28 @@ jobs:
           bash scripts/accounts-test.sh 2>&1 | tee accounts.log
           exit "${PIPESTATUS[0]}"
 
+      - name: Check the demo data script
+        if: ${{ !cancelled() && steps.migrations.outcome == 'success' }}
+        shell: bash
+        run: |
+          set +e
+          {
+            psql postgresql://postgres:postgres@127.0.0.1:54322/postgres -X -v ON_ERROR_STOP=1 <<'SQL'
+          begin;
+          insert into auth.users (id, email) values (gen_random_uuid(), 'demo.employee@meals.invalid');
+          \i scripts/demo-data.sql
+          select 'offerings', count(*) from public.meal_offerings o join public.restaurants r on r.id = o.restaurant_id where r.name = 'مطعم تجريبي';
+          select 'available', available from public.wallets w join public.profiles p on p.id = w.employee_id where p.username = 'demo.employee';
+          do $$ begin
+            if not exists (select 1 from public.meal_offerings o join public.restaurants r on r.id = o.restaurant_id where r.name = 'مطعم تجريبي') then
+              raise exception 'The demo data produced no offerings';
+            end if;
+          end $$;
+          rollback;
+          SQL
+          } 2>&1 | tee demo.log
+          exit "${PIPESTATUS[0]}"
+
       # Keeps the latest logs readable with plain git, on a branch of their own.
       - name: Publish logs
         if: always()

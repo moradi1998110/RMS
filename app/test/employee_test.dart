@@ -1,0 +1,491 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:rms/core/format.dart';
+import 'package:rms/core/theme.dart';
+import 'package:rms/features/employee/account_page.dart';
+import 'package:rms/features/employee/bookings_page.dart';
+import 'package:rms/features/employee/employee_models.dart';
+import 'package:rms/features/employee/employee_repository.dart';
+import 'package:rms/features/employee/meals_page.dart';
+import 'package:rms/shared/notice.dart';
+
+import 'fake_employee_repository.dart';
+
+final _soon = DateTime.now().add(const Duration(hours: 1));
+final _past = DateTime.now().subtract(const Duration(hours: 1));
+
+/// The first Monday of next month, so weekly repeats always stay inside one month.
+DateTime _firstMondayNextMonth() {
+  final now = DateTime.now();
+  var day = DateTime(now.year, now.month + 1);
+  while (day.weekday != DateTime.monday) {
+    day = addDays(day, 1);
+  }
+  return day;
+}
+
+Offering _offering(
+  String id,
+  DateTime day, {
+  String mealId = 'lunch-meal',
+  String name = 'رز ودجاج',
+  MealPeriod period = MealPeriod.lunch,
+  int price = 6000,
+  DateTime? bookUntil,
+  int? capacity,
+  int bookedCount = 0,
+}) {
+  return Offering(
+    id: id,
+    mealId: mealId,
+    name: name,
+    description: 'رز بسمتي',
+    extras: const ['سلطة', 'عصير'],
+    serviceDate: day,
+    period: period,
+    price: price,
+    bookUntil: bookUntil ?? _soon,
+    cancelUntil: day.add(const Duration(hours: 8)),
+    pickupFrom: day.add(const Duration(hours: 12)),
+    pickupUntil: day.add(const Duration(hours: 14, minutes: 30)),
+    capacity: capacity,
+    bookedCount: bookedCount,
+  );
+}
+
+Booking _booking(
+  String id,
+  DateTime day, {
+  String offeringId = 'other',
+  String mealId = 'lunch-meal',
+  BookingStatus status = BookingStatus.booked,
+  DateTime? cancelUntil,
+  MealPeriod period = MealPeriod.lunch,
+}) {
+  return Booking(
+    id: id,
+    offeringId: offeringId,
+    mealId: mealId,
+    mealName: 'رز ودجاج',
+    serviceDate: day,
+    period: period,
+    amount: 6000,
+    status: status,
+    cancelUntil: cancelUntil ?? _soon,
+    pickupFrom: day.add(const Duration(hours: 12)),
+    pickupUntil: day.add(const Duration(hours: 14, minutes: 30)),
+  );
+}
+
+Future<void> _pumpPage(WidgetTester tester, Widget page, FakeEmployeeRepository repository, {double height = 844}) async {
+  tester.view.physicalSize = Size(1170, height * 3);
+  tester.view.devicePixelRatio = 3;
+  addTearDown(tester.view.reset);
+  await tester.pumpWidget(
+    ProviderScope(
+      overrides: [employeeRepositoryProvider.overrideWithValue(repository)],
+      child: MaterialApp(
+        theme: appTheme(),
+        locale: const Locale('ar'),
+        supportedLocales: const [Locale('ar')],
+        localizationsDelegates: const [
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        home: Scaffold(body: page),
+      ),
+    ),
+  );
+  await tester.pumpAndSettle();
+}
+
+Future<void> _closeNotice(WidgetTester tester) async {
+  await tester.pump(noticeDuration);
+  await tester.pumpAndSettle();
+}
+
+void main() {
+  group('wording', () {
+    test('money is grouped', () {
+      expect(money(0), '0');
+      expect(money(750), '750');
+      expect(money(13500), '13,500');
+      expect(money(1250000), '1,250,000');
+      expect(money(-7500), '-7,500');
+    });
+
+    test('times read as a person says them', () {
+      expect(clock(DateTime(2026, 11, 5, 8)), '8:00 صباحاً');
+      expect(clock(DateTime(2026, 11, 5, 0, 30)), '12:30 صباحاً');
+      expect(clock(DateTime(2026, 11, 5, 14)), '2:00 ظهراً');
+      expect(clock(DateTime(2026, 11, 5, 18, 5)), '6:05 مساءً');
+      expect(clockRange(DateTime(2026, 11, 5, 12), DateTime(2026, 11, 5, 14, 30)), 'من 12:00 إلى 2:30 ظهراً');
+      expect(clockRange(DateTime(2026, 11, 5, 11), DateTime(2026, 11, 5, 14)), 'من 11:00 صباحاً إلى 2:00 ظهراً');
+    });
+
+    test('deadlines are told from the day of the meal', () {
+      final meal = DateTime(2026, 11, 5);
+      expect(deadlineText(DateTime(2026, 11, 5, 8), meal), '8:00 صباحاً يوم الوجبة');
+      expect(deadlineText(DateTime(2026, 11, 4, 22), meal), 'الليلة السابقة 10:00 مساءً');
+      expect(deadlineText(DateTime(2026, 11, 4, 9), meal), 'اليوم السابق 9:00 صباحاً');
+    });
+
+    test('days have names', () {
+      final today = DateTime(2026, 11, 5);
+      expect(relativeDay(today, today), 'اليوم');
+      expect(relativeDay(DateTime(2026, 11, 6), today), 'غداً');
+      expect(relativeDay(DateTime(2026, 11, 9), today), 'الاثنين 9 تشرين الثاني');
+    });
+
+    test('counts agree with the number', () {
+      expect(mealCount(2), 'وجبتان');
+      expect(mealCountObject(2), 'وجبتين');
+      expect(mealCount(4), '4 وجبات');
+    });
+  });
+
+  group('server data', () {
+    test('an offering row is read in local time', () {
+      final offering = Offering.fromRow({
+        'id': 'o1',
+        'meal_id': 'm1',
+        'service_date': '2026-11-09',
+        'period': 'lunch',
+        'price': 6000,
+        'book_until': '2026-11-08T17:00:00+00:00',
+        'cancel_until': '2026-11-09T05:00:00+00:00',
+        'pickup_from': '2026-11-09T09:00:00+00:00',
+        'pickup_until': '2026-11-09T11:30:00+00:00',
+        'capacity': 2,
+        'booked_count': 2,
+        'meals': {
+          'name': 'رز',
+          'description': 'وصف',
+          'image_path': null,
+          'has_salad': true,
+          'has_soft_drink': false,
+          'has_juice': true,
+          'has_vegetables': false,
+        },
+      });
+      expect(offering.serviceDate, DateTime(2026, 11, 9));
+      expect(offering.bookUntil.toUtc(), DateTime.utc(2026, 11, 8, 17));
+      expect(offering.bookUntil.isUtc, isFalse);
+      expect(offering.extras, ['سلطة', 'عصير']);
+      expect(offering.soldOut, isTrue);
+    });
+
+    test('a booking row is read', () {
+      final booking = Booking.fromRow({
+        'id': 'b1',
+        'offering_id': 'o1',
+        'amount': 6000,
+        'status': 'cancelled_by_restaurant',
+        'meal_offerings': {
+          'meal_id': 'm1',
+          'service_date': '2026-11-09',
+          'period': 'iftar',
+          'cancel_until': '2026-11-09T05:00:00+00:00',
+          'pickup_from': '2026-11-09T09:00:00+00:00',
+          'pickup_until': '2026-11-09T11:30:00+00:00',
+          'meals': {'name': 'رز'},
+        },
+      });
+      expect(booking.status, BookingStatus.cancelledByRestaurant);
+      expect(booking.period, MealPeriod.iftar);
+      expect(booking.mealName, 'رز');
+      expect(booking.isLive, isFalse);
+    });
+
+    test('rejections become sentences', () {
+      expect(
+        EmployeeFailure.fromServer('insufficient_balance', {'shortfall': 2000}).message,
+        'ينقصك 2,000 دينار. راجع مسؤول النظام لشحن رصيدك.',
+      );
+      expect(
+        EmployeeFailure.fromServer('booking_closed', {'service_date': '2026-11-09'}).message,
+        'انتهى وقت حجز وجبة الاثنين 9 تشرين الثاني. لم يُخصم شيء.',
+      );
+      expect(EmployeeFailure.fromServer('something_new', {}).message, EmployeeFailure.unknown.message);
+    });
+
+    test('a settlement has no sign, because the balance moved at booking', () {
+      WalletTx tx(WalletTxType type, int available, int held) =>
+          WalletTx(type: type, availableDelta: available, heldDelta: held, mealName: 'رز', createdAt: DateTime(2026, 11, 5));
+      expect(tx(WalletTxType.hold, -6000, 6000).amountText, '-6,000');
+      expect(tx(WalletTxType.release, 6000, -6000).amountText, '+6,000');
+      expect(tx(WalletTxType.settlePickup, 0, -6000).amountText, '6,000');
+      expect(tx(WalletTxType.settleNoShow, 0, -6000).text, contains('لم تُستلم'));
+    });
+  });
+
+  group('same meal on later days', () {
+    final now = DateTime(2026, 11, 2, 9);
+    final later = now.add(const Duration(days: 60));
+    Offering weekly(String id, DateTime day, {DateTime? bookUntil, String mealId = 'lunch-meal'}) =>
+        _offering(id, day, bookUntil: bookUntil ?? later, mealId: mealId);
+
+    test('booking repeats on the same weekday, in the same month, only if still open', () {
+      final pick = weekly('a', DateTime(2026, 11, 9));
+      final series = bookableSeries(
+        pick,
+        [
+          weekly('before', DateTime(2026, 11, 2)),
+          pick,
+          weekly('other-day', DateTime(2026, 11, 10)),
+          weekly('held', DateTime(2026, 11, 16)),
+          weekly('c', DateTime(2026, 11, 23)),
+          weekly('other-meal', DateTime(2026, 11, 23), mealId: 'fish'),
+          weekly('closed', DateTime(2026, 11, 30), bookUntil: DateTime(2026, 11, 1)),
+          weekly('next-month', DateTime(2026, 12, 7)),
+        ],
+        [_booking('b', DateTime(2026, 11, 16), offeringId: 'held')],
+        now,
+      );
+      expect(series.map((offering) => offering.id), ['a', 'c']);
+    });
+
+    test('cancelling counts later meals and reports those past their deadline', () {
+      final target = _booking('t', DateTime(2026, 11, 9), cancelUntil: later);
+      final result = cancelSeriesFor(
+        target,
+        [
+          target,
+          _booking('earlier', DateTime(2026, 11, 2), cancelUntil: later),
+          _booking('open', DateTime(2026, 11, 16), cancelUntil: later),
+          _booking('locked', DateTime(2026, 11, 23), cancelUntil: DateTime(2026, 11, 1)),
+          _booking('collected', DateTime(2026, 11, 30), cancelUntil: later, status: BookingStatus.pickedUp),
+          _booking('next-month', DateTime(2026, 12, 7), cancelUntil: later),
+          _booking('other-meal', DateTime(2026, 11, 16), cancelUntil: later, mealId: 'fish'),
+        ],
+        now,
+      );
+      expect(result.cancellable.map((booking) => booking.id), ['open']);
+      expect(result.locked, 1);
+    });
+
+    test('the next meal is the nearest one still to collect', () {
+      final done = _booking('done', DateTime(2026, 11, 1));
+      final soon = _booking('soon', DateTime(2026, 11, 3));
+      final after = _booking('after', DateTime(2026, 11, 9));
+      final collected = _booking('collected', DateTime(2026, 11, 2), status: BookingStatus.pickedUp);
+      expect(nextBooking([after, done, collected, soon], now)?.id, 'soon');
+      expect(nextBooking([done], now), isNull);
+    });
+  });
+
+  group('calendar', () {
+    test('the week starts on Saturday', () {
+      final november = calendarCells(DateTime(2026, 11)); // starts on a Sunday
+      expect(november.first, isNull);
+      expect(november[1], DateTime(2026, 11, 1));
+      expect(november.length, 31);
+      expect(calendarCells(DateTime(2026, 8)).first, DateTime(2026, 8, 1)); // a Saturday
+    });
+  });
+
+  group('meals page', () {
+    testWidgets('books one meal and tells the user', (tester) async {
+      final day = _firstMondayNextMonth();
+      final repository = FakeEmployeeRepository(offeringsValue: [_offering('o1', day)]);
+      await _pumpPage(tester, const MealsPage(), repository);
+
+      expect(find.text('50,000 دينار'), findsOneWidget);
+      expect(find.text('معها: سلطة وعصير'), findsOneWidget);
+      await tester.tap(find.byKey(const Key('book-o1')));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('book-repeat')), findsNothing);
+
+      await tester.tap(find.byKey(const Key('book-confirm')));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
+      expect(repository.bookCalls.single.$1, ['o1']);
+      expect(find.text('تم الحجز'), findsOneWidget);
+      await _closeNotice(tester);
+    });
+
+    testWidgets('repeats a meal for the rest of the month', (tester) async {
+      final day = _firstMondayNextMonth();
+      final repository = FakeEmployeeRepository(offeringsValue: [
+        _offering('o1', day),
+        _offering('o2', addDays(day, 7)),
+        _offering('o3', addDays(day, 14)),
+      ]);
+      await _pumpPage(tester, const MealsPage(), repository);
+
+      await tester.tap(find.byKey(const Key('book-o1')));
+      await tester.pumpAndSettle();
+      expect(find.text('6,000 دينار'), findsWidgets);
+      await tester.tap(find.byKey(const Key('book-repeat')));
+      await tester.pumpAndSettle();
+      expect(find.text('المبلغ: 18,000 دينار'), findsOneWidget);
+
+      await tester.tap(find.byKey(const Key('book-confirm')));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
+      expect(repository.bookCalls.single.$1, ['o1', 'o2', 'o3']);
+      expect(find.text('تم حجز 3 وجبات'), findsOneWidget);
+      await _closeNotice(tester);
+    });
+
+    testWidgets('without enough money it explains and offers no confirm', (tester) async {
+      final day = _firstMondayNextMonth();
+      final repository = FakeEmployeeRepository(
+        walletValue: const Wallet(available: 1000, held: 0),
+        offeringsValue: [_offering('o1', day)],
+      );
+      await _pumpPage(tester, const MealsPage(), repository);
+      await tester.tap(find.byKey(const Key('book-o1')));
+      await tester.pumpAndSettle();
+      expect(find.text('ينقصك 5,000 دينار. راجع مسؤول النظام لشحن رصيدك.'), findsOneWidget);
+      expect(find.byKey(const Key('book-confirm')), findsNothing);
+    });
+
+    testWidgets('a retry after a lost connection reuses the same key', (tester) async {
+      final day = _firstMondayNextMonth();
+      final repository = FakeEmployeeRepository(offeringsValue: [_offering('o1', day)])..failNext = EmployeeFailure.network;
+      await _pumpPage(tester, const MealsPage(), repository);
+      await tester.tap(find.byKey(const Key('book-o1')));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const Key('book-confirm')));
+      await tester.pumpAndSettle();
+      expect(find.text(EmployeeFailure.network.message), findsOneWidget);
+
+      await tester.tap(find.byKey(const Key('book-confirm')));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
+      expect(repository.bookCalls.length, 2);
+      expect(repository.bookCalls[0].$2, repository.bookCalls[1].$2);
+      await _closeNotice(tester);
+    });
+
+    testWidgets('booked, closed and sold-out meals offer no booking', (tester) async {
+      final day = _firstMondayNextMonth();
+      final repository = FakeEmployeeRepository(
+        offeringsValue: [
+          _offering('open', day, mealId: 'a', period: MealPeriod.breakfast),
+          _offering('mine', day, mealId: 'b'),
+          _offering('late', day, mealId: 'c', bookUntil: _past),
+          _offering('full', day, mealId: 'd', capacity: 3, bookedCount: 3, period: MealPeriod.dinner),
+        ],
+        bookingsValue: [_booking('b1', day, offeringId: 'mine', mealId: 'b')],
+      );
+      await _pumpPage(tester, const MealsPage(), repository, height: 2400);
+      expect(find.byKey(const Key('book-open')), findsOneWidget);
+      expect(find.byKey(const Key('book-mine')), findsNothing);
+      expect(find.byKey(const Key('book-late')), findsNothing);
+      expect(find.byKey(const Key('book-full')), findsNothing);
+      expect(find.text('محجوزة'), findsOneWidget);
+      expect(find.text('انتهى وقت الحجز'), findsOneWidget);
+      expect(find.text('نفدت الكمية'), findsOneWidget);
+    });
+
+    testWidgets('says so when nothing is published', (tester) async {
+      await _pumpPage(tester, const MealsPage(), FakeEmployeeRepository());
+      expect(find.text('لم يُنشر برنامج الوجبات بعد.'), findsOneWidget);
+    });
+  });
+
+  group('my bookings', () {
+    Future<void> openDay(WidgetTester tester, DateTime day) async {
+      await tester.tap(find.byIcon(Icons.chevron_right));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(Key('day-${isoDate(day)}')));
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('cancels one meal and returns the money', (tester) async {
+      final day = _firstMondayNextMonth();
+      final repository = FakeEmployeeRepository(bookingsValue: [_booking('b1', day)]);
+      await _pumpPage(tester, const BookingsPage(), repository);
+      await openDay(tester, day);
+
+      await tester.tap(find.byKey(const Key('cancel-b1')));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('cancel-more')), findsNothing);
+      await tester.tap(find.byKey(const Key('cancel-confirm')));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
+
+      expect(repository.cancelCalls.single.$1, 'b1');
+      expect(repository.seriesCalls, isEmpty);
+      expect(find.text('أُلغي الحجز'), findsOneWidget);
+      expect(find.text('رجع 6,000 دينار إلى رصيدك'), findsOneWidget);
+      await _closeNotice(tester);
+      expect(find.byKey(const Key('cancel-b1')), findsNothing);
+    });
+
+    testWidgets('can cancel the same meal on later weeks too', (tester) async {
+      final day = _firstMondayNextMonth();
+      final repository = FakeEmployeeRepository(bookingsValue: [
+        _booking('b1', day),
+        _booking('b2', addDays(day, 7)),
+        _booking('b3', addDays(day, 14)),
+      ]);
+      await _pumpPage(tester, const BookingsPage(), repository);
+      await openDay(tester, day);
+
+      await tester.tap(find.byKey(const Key('cancel-b1')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('cancel-more')));
+      await tester.pumpAndSettle();
+      expect(find.text('سيرجع إلى رصيدك فوراً: 18,000 دينار'), findsOneWidget);
+      expect(find.text('نعم، ألغِ 3 وجبات'), findsOneWidget);
+
+      await tester.tap(find.byKey(const Key('cancel-confirm')));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
+      expect(repository.seriesCalls.single.$1, 'b1');
+      expect(repository.cancelCalls, isEmpty);
+      expect(find.text('أُلغيت 3 وجبات'), findsOneWidget);
+      await _closeNotice(tester);
+    });
+
+    testWidgets('after the deadline there is no cancel button', (tester) async {
+      final day = _firstMondayNextMonth();
+      final repository = FakeEmployeeRepository(bookingsValue: [_booking('b1', day, cancelUntil: _past)]);
+      await _pumpPage(tester, const BookingsPage(), repository);
+      await openDay(tester, day);
+      expect(find.byKey(const Key('cancel-b1')), findsNothing);
+      expect(find.text('انتهى وقت الإلغاء'), findsOneWidget);
+      expect(find.text('لا يمكن إلغاؤها الآن، وستُخصم إذا لم تستلمها'), findsOneWidget);
+    });
+
+    testWidgets('shows what happened to past meals', (tester) async {
+      final day = _firstMondayNextMonth();
+      final repository = FakeEmployeeRepository(bookingsValue: [
+        _booking('b1', day, status: BookingStatus.pickedUp, period: MealPeriod.breakfast),
+        _booking('b2', day, status: BookingStatus.noShow),
+        _booking('b3', day, status: BookingStatus.cancelledByRestaurant, period: MealPeriod.dinner),
+      ]);
+      await _pumpPage(tester, const BookingsPage(), repository);
+      await openDay(tester, day);
+      expect(find.text('تم الاستلام'), findsOneWidget);
+      expect(find.text('لم تُستلم، واستُقطع المبلغ'), findsOneWidget);
+      expect(find.text('ألغاها المطعم، ورجع المبلغ إلى رصيدك'), findsOneWidget);
+    });
+  });
+
+  group('account', () {
+    testWidgets('shows both balances and the history', (tester) async {
+      final repository = FakeEmployeeRepository(
+        walletValue: const Wallet(available: 13500, held: 34000),
+        transactionsValue: [
+          WalletTx(type: WalletTxType.topup, availableDelta: 70000, heldDelta: 0, createdAt: DateTime(2026, 11, 1)),
+          WalletTx(type: WalletTxType.hold, availableDelta: -6000, heldDelta: 6000, mealName: 'رز', createdAt: DateTime(2026, 11, 2)),
+        ],
+      );
+      await _pumpPage(tester, const AccountPage(), repository);
+      expect(find.text('13,500'), findsOneWidget);
+      expect(find.text('34,000'), findsOneWidget);
+      expect(find.text('شحن من مسؤول النظام'), findsOneWidget);
+      expect(find.text('+70,000'), findsOneWidget);
+      expect(find.text('حجز رز'), findsOneWidget);
+      expect(find.text('-6,000'), findsOneWidget);
+    });
+  });
+}

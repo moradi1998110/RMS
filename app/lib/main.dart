@@ -10,7 +10,7 @@ import 'core/theme.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Supabase.initialize(url: AppConfig.supabaseUrl, anonKey: AppConfig.publishableKey);
+  await Supabase.initialize(url: AppConfig.supabaseUrl, publishableKey: AppConfig.publishableKey);
   runApp(const ProviderScope(child: RmsApp()));
 }
 

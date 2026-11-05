@@ -53,7 +53,12 @@ jobs:
           grep -q 'android.permission.INTERNET' "$manifest"
 
       - name: Get packages
-        run: flutter pub get 2>&1 | tee ../pub.log; exit "${PIPESTATUS[0]}"
+        run: |
+          flutter pub get 2>&1 | tee ../pub.log
+          code="${PIPESTATUS[0]}"
+          # Published so it can be committed; the build cannot produce it anywhere else.
+          cp pubspec.lock ../pubspec-lock.log
+          exit "$code"
 
       - name: Analyze
         id: analyze

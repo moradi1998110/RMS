@@ -20,6 +20,16 @@ class AppColors {
   static const refundSoft = Color(0xFFE6E1F5);
   static const onRefundSoft = Color(0xFF3F2A8C);
   static const scrim = Color(0x4712302C);
+  static const breakfast = Color(0xFFC77700);
+  static const lunch = Color(0xFF0E8A7D);
+  static const dinner = Color(0xFF3F2A8C);
+  static const emptyLine = Color(0xFFE1E8E6);
+  static const closed = Color(0xFFECEFEE);
+  static const imagePlaceholder = Color(0xFFDCE7E4);
+  static const todayCell = Color(0xFFEAF4F1);
+  static const dayCell = Color(0xFFF7F9F8);
+  static const pastDay = Color(0xFF5C736E);
+  static const unselected = Color(0xFFB7C6C2);
 }
 
 /// Large text and tall controls throughout: most users are older staff.

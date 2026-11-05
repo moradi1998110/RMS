@@ -12,8 +12,11 @@ import 'package:rms/features/auth/auth_models.dart';
 import 'package:rms/features/auth/auth_repository.dart';
 import 'package:rms/features/auth/change_password_screen.dart';
 import 'package:rms/features/auth/login_screen.dart';
+import 'package:rms/features/employee/employee_repository.dart';
 import 'package:rms/features/employee/employee_shell.dart';
 import 'package:rms/shared/notice.dart';
+
+import 'fake_employee_repository.dart';
 
 const _employee = Profile(fullName: 'Test Employee', role: UserRole.employee, mustChangePassword: false, isActive: true);
 
@@ -67,7 +70,10 @@ class FakeAuthRepository implements AuthRepository {
 
 Widget _app(Widget home, FakeAuthRepository repository) {
   return ProviderScope(
-    overrides: [authRepositoryProvider.overrideWithValue(repository)],
+    overrides: [
+      authRepositoryProvider.overrideWithValue(repository),
+      employeeRepositoryProvider.overrideWithValue(FakeEmployeeRepository()),
+    ],
     child: MaterialApp(
       theme: appTheme(),
       locale: const Locale('ar'),
