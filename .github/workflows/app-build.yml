@@ -44,6 +44,8 @@ jobs:
       - name: Generate the Android project
         run: |
           flutter create --project-name rms --org com.rms --platforms android . 2>&1 | tee ../create.log
+          # flutter create overwrites some of our files, such as the lint rules.
+          git checkout -- .
           rm -f test/widget_test.dart
           manifest=android/app/src/main/AndroidManifest.xml
           sed -i 's|<manifest xmlns:android="http://schemas.android.com/apk/res/android">|&\n    <uses-permission android:name="android.permission.INTERNET"/>|' "$manifest"
@@ -90,6 +92,7 @@ jobs:
           fi
           git config user.name "github-actions"
           git config user.email "github-actions@users.noreply.github.com"
+          git reset -q --hard # the logs are untracked, so they stay
           git switch --orphan app-results
           git add -f ./*.log
           git commit -q -m "App logs for ${{ github.sha }}"
