@@ -276,7 +276,7 @@ class _DaySheet extends ConsumerWidget {
   Future<void> _cancel(BuildContext context, Booking booking) async {
     final navigator = Navigator.of(context);
     final result = await showCancelSheet(context, booking);
-    if (result == null) return;
+    if (result == null || !navigator.mounted) return;
     navigator.pop();
     await showNotice(
       navigator.context,
