@@ -88,7 +88,7 @@ class Offering {
 
 enum BookingStatus { booked, cancelled, cancelledByRestaurant, pickedUp, noShow }
 
-BookingStatus _bookingStatus(String value) => switch (value) {
+BookingStatus parseBookingStatus(String value) => switch (value) {
       'booked' => BookingStatus.booked,
       'cancelled' => BookingStatus.cancelled,
       'cancelled_by_restaurant' => BookingStatus.cancelledByRestaurant,
@@ -139,7 +139,7 @@ class Booking {
       serviceDate: DateTime.parse(offering['service_date'] as String),
       period: MealPeriod.values.byName(offering['period'] as String),
       amount: (row['amount'] as num).toInt(),
-      status: _bookingStatus(row['status'] as String),
+      status: parseBookingStatus(row['status'] as String),
       cancelUntil: DateTime.parse(offering['cancel_until'] as String).toLocal(),
       pickupFrom: DateTime.parse(offering['pickup_from'] as String).toLocal(),
       pickupUntil: DateTime.parse(offering['pickup_until'] as String).toLocal(),

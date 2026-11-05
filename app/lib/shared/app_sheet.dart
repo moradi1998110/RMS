@@ -14,9 +14,13 @@ Future<T?> showAppSheet<T>(BuildContext context, {required WidgetBuilder builder
     constraints: BoxConstraints(maxHeight: MediaQuery.sizeOf(context).height * 0.9),
     shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
     builder: (context) => SafeArea(
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(20, 22, 20, 24),
-        child: builder(context),
+      child: Padding(
+        // Keeps the fields in a form above the keyboard.
+        padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(context).bottom),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(20, 22, 20, 24),
+          child: builder(context),
+        ),
       ),
     ),
   );
