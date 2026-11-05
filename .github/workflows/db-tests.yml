@@ -82,16 +82,24 @@ jobs:
         shell: bash
         run: |
           set +e
+          sed 's/emp1@meals/emp2@meals/' scripts/demo-data.sql > /tmp/demo-second.sql
           {
             psql postgresql://postgres:postgres@127.0.0.1:54322/postgres -X -v ON_ERROR_STOP=1 <<'SQL'
           begin;
-          insert into auth.users (id, email) values (gen_random_uuid(), 'demo.employee@meals.invalid');
+          insert into auth.users (id, email) values (gen_random_uuid(), 'emp1@meals.invalid'), (gen_random_uuid(), 'emp2@meals.invalid');
           \i scripts/demo-data.sql
+          \i /tmp/demo-second.sql
           select 'offerings', count(*) from public.meal_offerings o join public.restaurants r on r.id = o.restaurant_id where r.name = 'مطعم تجريبي';
-          select 'available', available from public.wallets w join public.profiles p on p.id = w.employee_id where p.username = 'demo.employee';
+          select p.username, w.available, u.email_confirmed_at is not null as confirmed from public.wallets w join public.profiles p on p.id = w.employee_id join auth.users u on u.id = p.id where p.username in ('emp1', 'emp2');
           do $$ begin
             if not exists (select 1 from public.meal_offerings o join public.restaurants r on r.id = o.restaurant_id where r.name = 'مطعم تجريبي') then
               raise exception 'The demo data produced no offerings';
+            end if;
+            if (select count(*) from public.restaurants where name = 'مطعم تجريبي') <> 1 then
+              raise exception 'The second run made another restaurant';
+            end if;
+            if (select count(*) from public.wallets w join public.profiles p on p.id = w.employee_id join auth.users u on u.id = p.id where p.username in ('emp1', 'emp2') and w.available = 100000 and u.email_confirmed_at is not null) <> 2 then
+              raise exception 'An employee was not set up';
             end if;
           end $$;
           rollback;
