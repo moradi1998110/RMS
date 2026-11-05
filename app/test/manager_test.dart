@@ -6,6 +6,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:qr_flutter/qr_flutter.dart';
+import 'package:rms/core/format.dart';
 import 'package:rms/core/theme.dart';
 import 'package:rms/features/admin/admin_models.dart';
 import 'package:rms/features/employee/codes_page.dart';
@@ -657,6 +658,60 @@ void main() {
     testWidgets('says so when nothing is waiting', (tester) async {
       await _pumpPage(tester, const CodesPage(), FakeManagerRepository(), employee: FakeEmployeeRepository());
       expect(find.text('لا توجد وجبات للاستلام الآن.'), findsOneWidget);
+      expect(find.byKey(const Key('code-next-time')), findsNothing);
+    });
+
+    testWidgets('a later meal says when its code will appear', (tester) async {
+      final from = DateTime.now().add(const Duration(hours: 3));
+      final employee = FakeEmployeeRepository(bookingsValue: [
+        Booking(
+          id: 'b1',
+          offeringId: 'o1',
+          mealId: 'm1',
+          mealName: 'كباب',
+          serviceDate: dayOf(from),
+          period: MealPeriod.lunch,
+          amount: 5000,
+          status: BookingStatus.booked,
+          cancelUntil: from.subtract(const Duration(hours: 2)),
+          pickupFrom: from,
+          pickupUntil: from.add(const Duration(hours: 2)),
+        ),
+      ]);
+      await _pumpPage(tester, const CodesPage(), FakeManagerRepository(), employee: employee);
+      expect(find.byKey(const Key('code-qr')), findsNothing);
+      expect(_keyText(tester, 'code-next-time'), contains('كباب'));
+      expect(_keyText(tester, 'code-next-time'), contains(clock(from)));
+    });
+
+    testWidgets('a code that runs out of time is not shown as collected', (tester) async {
+      final ended = Pickup(
+        bookingId: '1',
+        token: 'token-1',
+        shortCode: '482911',
+        isMine: true,
+        ownerName: 'سارة',
+        mealName: 'رز',
+        pickupFrom: DateTime.now().subtract(const Duration(hours: 2)),
+        pickupUntil: DateTime.now().subtract(const Duration(minutes: 1)),
+      );
+      final employee = FakeEmployeeRepository()..pickupsValue = [ended];
+      await _pumpPage(tester, const CodesPage(), FakeManagerRepository(), employee: employee);
+      employee.pickupsValue = const [];
+      await tester.pump(const Duration(seconds: 6));
+      await tester.pump();
+      expect(find.byKey(const Key('code-expired')), findsOneWidget);
+      expect(find.byKey(const Key('code-done')), findsNothing);
+    });
+
+    testWidgets('a delegated meal that opens later joins the codes', (tester) async {
+      final employee = FakeEmployeeRepository()..pickupsValue = [pickup('1')];
+      await _pumpPage(tester, const CodesPage(), FakeManagerRepository(), employee: employee);
+      expect(_keyText(tester, 'code-counter'), '1 من 1');
+      employee.pickupsValue = [pickup('1'), pickup('2', mine: false)];
+      await tester.pump(const Duration(seconds: 6));
+      await tester.pump();
+      expect(_keyText(tester, 'code-counter'), '1 من 2');
     });
   });
 }

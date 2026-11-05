@@ -128,6 +128,9 @@ class Booking {
 
   bool canCancelAt(DateTime now) => isLive && now.isBefore(cancelUntil);
 
+  /// The server sends a code only inside this window.
+  bool pickupOpenAt(DateTime now) => isLive && !now.isBefore(pickupFrom) && now.isBefore(pickupUntil);
+
   factory Booking.fromRow(Map<String, dynamic> row) {
     final offering = row['meal_offerings'] as Map<String, dynamic>;
     final meal = offering['meals'] as Map<String, dynamic>;

@@ -271,8 +271,8 @@ select lives_ok($q$ select public.set_delegation('emp2', test_util.booking('emp1
   'delegate one meal to a colleague');
 
 select test_util.login('emp2');
-select is((select count(*)::integer from public.my_pickups() where not is_mine and booking_id = test_util.booking('emp1', 'o1')), 1,
-  'the delegate sees the colleague''s meal');
+select is((select count(*)::integer from public.my_pickups() where booking_id = test_util.booking('emp1', 'o1')), 0,
+  'no code is shown before pickup starts');
 select throws_ok($q$ select public.cancel_booking(test_util.booking('emp1', 'o1'), gen_random_uuid()) $q$,
   'P0001', 'booking_not_found', 'a delegate cannot cancel the booking');
 select throws_ok($q$ select public.set_delegation('emp3', test_util.booking('emp1', 'o1'), gen_random_uuid()) $q$,
@@ -289,7 +289,15 @@ select is(public.redeem_pickup('not-a-real-token', gen_random_uuid())->>'reason'
 select test_util.logout();
 select test_util.open_pickup('o1');
 
+select test_util.login('emp2');
+select is((select count(*)::integer from public.my_pickups() where not is_mine and booking_id = test_util.booking('emp1', 'o1')), 1,
+  'once pickup starts the delegate sees the colleague''s meal');
+
 select test_util.login('emp1');
+select is((select count(*)::integer from public.my_pickups() where is_mine and booking_id = test_util.booking('emp1', 'o1')), 1,
+  'and the owner sees their own');
+select is((select count(*)::integer from public.my_pickups() where booking_id = test_util.booking('emp1', 'o2')), 0,
+  'a meal whose pickup has not started stays hidden');
 select throws_ok($q$ select public.redeem_pickup(test_util.token('emp1', 'o1', 'emp1'), gen_random_uuid()) $q$,
   'P0001', 'forbidden', 'an employee cannot redeem');
 
@@ -331,12 +339,12 @@ select test_util.login('emp3');
 select lives_ok($q$ select public.set_delegation('emp1', null, gen_random_uuid()) $q$, 'standing delegation');
 select lives_ok($q$ select public.book_meals(array[test_util.id('standing')], gen_random_uuid()) $q$, 'book after delegating');
 
+select test_util.logout();
+select test_util.open_pickup('standing');
+
 select test_util.login('emp1');
 select is((select count(*)::integer from public.my_pickups() where booking_id = test_util.booking('emp3', 'standing')), 1,
   'the standing delegate gets a code for the new meal');
-
-select test_util.logout();
-select test_util.open_pickup('standing');
 
 select test_util.login('mgr1');
 select is(public.redeem_short_code(test_util.short_code('emp3', 'standing', 'emp1'), gen_random_uuid())->>'ok', 'true',

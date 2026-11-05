@@ -163,6 +163,8 @@ class _NextMealCard extends StatelessWidget {
           Text(booking.mealName, style: textTheme.titleMedium?.copyWith(fontSize: 22)),
           const SizedBox(height: 4),
           Text('استلمها $pickupDay ${clockRange(booking.pickupFrom, booking.pickupUntil)}', style: textTheme.bodyMedium),
+          if (!booking.pickupOpenAt(DateTime.now()))
+            Text('يظهر الباركود عند بدء الاستلام', style: textTheme.bodyMedium?.copyWith(color: AppColors.inkMuted)),
           const SizedBox(height: 10),
           SizedBox(
             width: double.infinity,

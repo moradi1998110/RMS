@@ -437,7 +437,15 @@ class _BookingDetails extends StatelessWidget {
         Text('${clockRange(booking.pickupFrom, booking.pickupUntil)} · ${dinars(booking.amount)}', style: const TextStyle(fontSize: 17)),
         const SizedBox(height: 4),
         Text(statusText, style: TextStyle(fontSize: 17, fontWeight: FontWeight.w500, color: statusColor)),
-        if (booking.isLive) ...[
+        if (booking.isLive && !booking.pickupOpenAt(now) && now.isBefore(booking.pickupFrom)) ...[
+          const SizedBox(height: 4),
+          Text(
+            'يظهر الباركود عند بدء الاستلام ${relativeDay(dayOf(booking.pickupFrom), dayOf(now))} ${clock(booking.pickupFrom)}',
+            key: Key('code-later-${booking.id}'),
+            style: const TextStyle(fontSize: 16, color: AppColors.inkMuted),
+          ),
+        ],
+        if (booking.pickupOpenAt(now)) ...[
           const SizedBox(height: 8),
           FilledButton(
             key: Key('codes-${booking.id}'),

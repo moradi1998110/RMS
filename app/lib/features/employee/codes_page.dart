@@ -10,7 +10,8 @@ import 'employee_models.dart';
 import 'employee_providers.dart';
 import 'employee_repository.dart';
 
-/// Pickup codes, one card at a time: the user's own meals and those delegated to them.
+/// Pickup codes whose pickup is open now, one card at a time: the user's own meal
+/// and those delegated to them.
 class CodesPage extends ConsumerStatefulWidget {
   const CodesPage({super.key, this.startBookingId});
 
@@ -23,6 +24,7 @@ class CodesPage extends ConsumerStatefulWidget {
 class _CodesPageState extends ConsumerState<CodesPage> {
   List<Pickup>? _pickups;
   final _collected = <String>{};
+  final _expired = <String>{};
   int _index = 0;
   bool _failed = false;
   Timer? _poll;
@@ -53,8 +55,17 @@ class _CodesPageState extends ConsumerState<CodesPage> {
           final start = latest.indexWhere((pickup) => pickup.bookingId == widget.startBookingId);
           _index = start < 0 ? 0 : start;
         } else {
+          // A code that left the list was scanned, unless its pickup time ran out.
           final live = {for (final pickup in latest) pickup.bookingId};
-          _collected.addAll(known.map((pickup) => pickup.bookingId).where((id) => !live.contains(id)));
+          final now = DateTime.now();
+          for (final pickup in known.where((pickup) => !live.contains(pickup.bookingId))) {
+            if (_collected.contains(pickup.bookingId) || _expired.contains(pickup.bookingId)) continue;
+            (now.isBefore(pickup.pickupUntil) ? _collected : _expired).add(pickup.bookingId);
+          }
+          // A delegated meal can open while this page is up.
+          final shown = {for (final pickup in known) pickup.bookingId};
+          final added = latest.where((pickup) => !shown.contains(pickup.bookingId)).toList();
+          if (added.isNotEmpty) _pickups = [...known, ...added];
         }
       });
     } on EmployeeFailure {
@@ -134,10 +145,29 @@ class _CodesPageState extends ConsumerState<CodesPage> {
       );
     }
     if (pickups.isEmpty) {
-      return const Center(child: Text('لا توجد وجبات للاستلام الآن.', textAlign: TextAlign.center, style: TextStyle(fontSize: 18)));
+      final now = DateTime.now();
+      final next = nextBooking(ref.watch(activeBookingsProvider).valueOrNull ?? const [], now);
+      return Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('لا توجد وجبات للاستلام الآن.', textAlign: TextAlign.center, style: TextStyle(fontSize: 18)),
+            if (next != null && now.isBefore(next.pickupFrom)) ...[
+              const SizedBox(height: 8),
+              Text(
+                'يظهر باركود ${next.mealName} ${relativeDay(dayOf(next.pickupFrom), dayOf(now))} الساعة ${clock(next.pickupFrom)}.',
+                key: const Key('code-next-time'),
+                textAlign: TextAlign.center,
+                style: const TextStyle(fontSize: 18, color: AppColors.inkMuted),
+              ),
+            ],
+          ],
+        ),
+      );
     }
     final pickup = pickups[_index];
     final collected = _collected.contains(pickup.bookingId);
+    final expired = _expired.contains(pickup.bookingId);
     return SingleChildScrollView(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -162,6 +192,14 @@ class _CodesPageState extends ConsumerState<CodesPage> {
                   Text('تم الاستلام', style: TextStyle(fontSize: 24, fontWeight: FontWeight.w700, color: AppColors.onPrimarySoft)),
                 ],
               ),
+            )
+          else if (expired)
+            Container(
+              key: const Key('code-expired'),
+              height: 280,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(color: AppColors.closed, borderRadius: BorderRadius.circular(20)),
+              child: const Text('انتهى وقت الاستلام', style: TextStyle(fontSize: 24, fontWeight: FontWeight.w700, color: AppColors.inkMuted)),
             )
           else ...[
             Center(
