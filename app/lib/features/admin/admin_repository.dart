@@ -55,21 +55,21 @@ class SupabaseAdminRepository implements AdminRepository {
         final rows = await _allPages((from, to) => _client
             .from('profiles')
             .select('id, username, full_name, department, role, restaurant_id, is_active, restaurants(name), wallets(available, held)')
-            .order('full_name')
-            .order('id')
+            .order('full_name', ascending: true)
+            .order('id', ascending: true)
             .range(from, to));
         return rows.map(AdminUser.fromRow).toList();
       });
 
   @override
   Future<List<Place>> places() => _guard(() async {
-        final rows = await _client.from('restaurants').select('id, site_id, name, is_active, sites(name)').order('name');
+        final rows = await _client.from('restaurants').select('id, site_id, name, is_active, sites(name)').order('name', ascending: true);
         return rows.map(Place.fromRow).toList();
       });
 
   @override
   Future<List<RamadanPeriod>> ramadanPeriods() => _guard(() async {
-        final rows = await _client.from('ramadan_periods').select().order('start_date');
+        final rows = await _client.from('ramadan_periods').select().order('start_date', ascending: true);
         return rows.map(RamadanPeriod.fromRow).toList();
       });
 
@@ -91,7 +91,7 @@ class SupabaseAdminRepository implements AdminRepository {
             .select('status, restaurant_id, meal_offerings!inner(service_date, period)')
             .gte('meal_offerings.service_date', isoDate(start))
             .lt('meal_offerings.service_date', isoDate(addDays(start, 7)))
-            .order('id')
+            .order('id', ascending: true)
             .range(from, to));
         return rows.map(WeekRow.fromRow).toList();
       });

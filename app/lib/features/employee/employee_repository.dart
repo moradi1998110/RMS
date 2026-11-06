@@ -49,7 +49,7 @@ class SupabaseEmployeeRepository implements EmployeeRepository {
                 'capacity, booked_count, meals(name, description, image_path, has_salad, has_soft_drink, has_juice, has_vegetables)')
             .eq('status', 'open')
             .gte('service_date', isoDate(from))
-            .order('service_date');
+            .order('service_date', ascending: true);
         return rows.map(Offering.fromRow).toList();
       });
 

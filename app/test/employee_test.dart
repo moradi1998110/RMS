@@ -294,7 +294,7 @@ void main() {
 
   group('meals page', () {
     testWidgets('books one meal and tells the user', (tester) async {
-      final day = _firstMondayNextMonth();
+      final day = dayOf(DateTime.now());
       final repository = FakeEmployeeRepository(offeringsValue: [_offering('o1', day)]);
       await _pumpPage(tester, const MealsPage(), repository);
 
@@ -312,15 +312,21 @@ void main() {
       await _closeNotice(tester);
     });
 
-    testWidgets('repeats a meal for the rest of the month', (tester) async {
+    testWidgets('repeats a meal for the rest of the month from my bookings', (tester) async {
       final day = _firstMondayNextMonth();
       final repository = FakeEmployeeRepository(offeringsValue: [
         _offering('o1', day),
         _offering('o2', addDays(day, 7)),
         _offering('o3', addDays(day, 14)),
       ]);
-      await _pumpPage(tester, const MealsPage(), repository);
+      await _pumpPage(tester, const BookingsPage(), repository, height: 1200);
+      await tester.tap(find.byIcon(Icons.chevron_right));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(Key('day-${isoDate(day)}')));
+      await tester.pumpAndSettle();
 
+      await tester.ensureVisible(find.byKey(const Key('book-o1')));
+      await tester.pumpAndSettle();
       await tester.tap(find.byKey(const Key('book-o1')));
       await tester.pumpAndSettle();
       expect(find.text('6,000 دينار'), findsWidgets);
@@ -337,7 +343,7 @@ void main() {
     });
 
     testWidgets('without enough money it explains and offers no confirm', (tester) async {
-      final day = _firstMondayNextMonth();
+      final day = dayOf(DateTime.now());
       final repository = FakeEmployeeRepository(
         walletValue: const Wallet(available: 1000, held: 0),
         offeringsValue: [_offering('o1', day)],
@@ -350,7 +356,7 @@ void main() {
     });
 
     testWidgets('a retry after a lost connection reuses the same key', (tester) async {
-      final day = _firstMondayNextMonth();
+      final day = dayOf(DateTime.now());
       final repository = FakeEmployeeRepository(offeringsValue: [_offering('o1', day)])..failNext = EmployeeFailure.network;
       await _pumpPage(tester, const MealsPage(), repository);
       await tester.tap(find.byKey(const Key('book-o1')));
@@ -369,7 +375,7 @@ void main() {
     });
 
     testWidgets('booked, closed and sold-out meals offer no booking', (tester) async {
-      final day = _firstMondayNextMonth();
+      final day = dayOf(DateTime.now());
       final repository = FakeEmployeeRepository(
         offeringsValue: [
           _offering('open', day, mealId: 'a', period: MealPeriod.breakfast),
@@ -390,7 +396,7 @@ void main() {
     });
 
     testWidgets('a booked meal is cancelled from its card after a confirmation', (tester) async {
-      final day = _firstMondayNextMonth();
+      final day = dayOf(DateTime.now());
       final repository = FakeEmployeeRepository(
         offeringsValue: [_offering('mine', day)],
         bookingsValue: [_booking('b1', day, offeringId: 'mine')],
@@ -413,7 +419,7 @@ void main() {
     });
 
     testWidgets('a booked meal past its cancel time says so instead', (tester) async {
-      final day = _firstMondayNextMonth();
+      final day = dayOf(DateTime.now());
       final repository = FakeEmployeeRepository(
         offeringsValue: [_offering('mine', day)],
         bookingsValue: [_booking('b1', day, offeringId: 'mine', cancelUntil: _past)],
@@ -423,38 +429,30 @@ void main() {
       expect(find.text('محجوزة · انتهى وقت الإلغاء'), findsOneWidget);
     });
 
-    testWidgets('shows today while it can be booked, and tomorrow once it cannot', (tester) async {
+    testWidgets('shows only today, even after booking closes and whatever order the meals arrive in', (tester) async {
       final today = dayOf(DateTime.now());
-      final tomorrow = addDays(today, 1);
+      // Later days first, as a descending query would return them.
       await _pumpPage(tester, const MealsPage(), FakeEmployeeRepository(offeringsValue: [
-        _offering('today', today, name: 'شوربة'),
-        _offering('tomorrow', tomorrow, name: 'كباب'),
+        _offering('far', addDays(today, 55), name: 'دولمة'),
+        _offering('tomorrow', addDays(today, 1), name: 'كباب'),
+        _offering('today', today, name: 'شوربة', bookUntil: _past),
       ]), height: 1600);
       expect(_text(tester, 'meals-day'), 'وجبات اليوم');
       expect(find.text('شوربة'), findsOneWidget);
+      expect(find.text('انتهى وقت الحجز'), findsOneWidget);
       expect(find.text('كباب'), findsNothing);
-
-      await tester.pumpWidget(const SizedBox());
-      await _pumpPage(tester, const MealsPage(), FakeEmployeeRepository(offeringsValue: [
-        _offering('today', today, name: 'شوربة', bookUntil: _past),
-        _offering('tomorrow', tomorrow, name: 'كباب'),
-      ]), height: 1600);
-      expect(_text(tester, 'meals-day'), 'وجبات الغد');
-      expect(find.text('كباب'), findsOneWidget);
-      expect(find.text('شوربة'), findsNothing);
-    });
-
-    testWidgets('with nothing left to book it points to my bookings', (tester) async {
-      final today = dayOf(DateTime.now());
-      final repository = FakeEmployeeRepository(offeringsValue: [_offering('today', today, bookUntil: _past)]);
-      await _pumpPage(tester, const MealsPage(), repository);
-      expect(find.text('لا توجد وجبات يمكن حجزها الآن.'), findsOneWidget);
+      expect(find.text('دولمة'), findsNothing);
       expect(find.byKey(const Key('go-bookings')), findsOneWidget);
     });
 
-    testWidgets('says so when nothing is published', (tester) async {
-      await _pumpPage(tester, const MealsPage(), FakeEmployeeRepository());
-      expect(find.text('لم يُنشر برنامج الوجبات بعد.'), findsOneWidget);
+    testWidgets('with no meal today it says so and points to my bookings', (tester) async {
+      final today = dayOf(DateTime.now());
+      final repository = FakeEmployeeRepository(offeringsValue: [_offering('tomorrow', addDays(today, 1), name: 'كباب')]);
+      await _pumpPage(tester, const MealsPage(), repository);
+      expect(find.text('لا توجد وجبات اليوم.'), findsOneWidget);
+      expect(find.text('كباب'), findsNothing);
+      await tester.tap(find.byKey(const Key('go-bookings')));
+      await tester.pumpAndSettle();
     });
   });
 
@@ -695,12 +693,6 @@ void bookingScenarios() {
       await tester.pumpAndSettle();
     }
 
-    test('with no meal today the meals page opens on the nearest day with meals', () {
-      final thursday = nextWeekday(DateTime.thursday);
-      final saturday = nextWeekday(DateTime.saturday);
-      expect(shownDay(program(), DateTime.now()), thursday.isBefore(saturday) ? thursday : saturday);
-    });
-
     testWidgets('every Thursday can be opened and booked from my bookings, not just the last', (tester) async {
       for (final week in [0, 1, 2, 7]) {
         final repository = FakeEmployeeRepository(offeringsValue: program());
@@ -729,7 +721,7 @@ void bookingScenarios() {
     });
 
     testWidgets('a closed meal says when booking ended, an open one until when', (tester) async {
-      final day = nextWeekday(DateTime.thursday);
+      final day = dayOf(DateTime.now());
       await _pumpPage(tester, const MealsPage(), FakeEmployeeRepository(offeringsValue: [
         _offering('late', day, mealId: 'a', bookUntil: DateTime(day.year, day.month, day.day, 12)),
       ]));

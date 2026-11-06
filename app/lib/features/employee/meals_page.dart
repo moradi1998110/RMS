@@ -11,14 +11,6 @@ import 'employee_providers.dart';
 import 'meal_card.dart';
 import 'rate_sheet.dart';
 
-/// The day the meals page shows: today while something can still be booked today,
-/// otherwise the next day that has meals open, so the evening shows tomorrow.
-DateTime? shownDay(List<Offering> offerings, DateTime now) {
-  final today = dayOf(now);
-  if (offerings.any((offering) => offering.serviceDate == today && offering.isOpenAt(now))) return today;
-  return offerings.where((offering) => offering.serviceDate.isAfter(today) && offering.isOpenAt(now)).firstOrNull?.serviceDate;
-}
-
 class MealsPage extends ConsumerWidget {
   const MealsPage({super.key});
 
@@ -46,8 +38,8 @@ class MealsPage extends ConsumerWidget {
 
     final now = DateTime.now();
     final today = dayOf(now);
-    final day = shownDay(offeringsValue, now);
-    final dayMeals = day == null ? const <Offering>[] : offeringsValue.where((offering) => offering.serviceDate == day).toList();
+    // Only today here; other days are booked from the calendar in حجوزاتي.
+    final dayMeals = offeringsValue.where((offering) => offering.serviceDate == today).toList();
     final next = nextBooking(activeValue, now);
     final textTheme = Theme.of(context).textTheme;
     // Ratings never hold up the page; they appear once they load.
@@ -71,35 +63,18 @@ class MealsPage extends ConsumerWidget {
             _NextMealCard(booking: next, today: today),
           ],
           const SizedBox(height: 20),
-          if (day == null) ...[
+          Text('وجبات اليوم', key: const Key('meals-day'), style: textTheme.headlineMedium?.copyWith(fontSize: 26)),
+          if (dayMeals.isEmpty)
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 24),
               child: Text(
-                offeringsValue.isEmpty ? 'لم يُنشر برنامج الوجبات بعد.' : 'لا توجد وجبات يمكن حجزها الآن.',
+                'لا توجد وجبات اليوم.',
                 key: const Key('meals-none'),
                 textAlign: TextAlign.center,
                 style: textTheme.bodyLarge?.copyWith(color: AppColors.inkMuted),
               ),
-            ),
-            OutlinedButton(
-              key: const Key('go-bookings'),
-              onPressed: () => ref.read(employeeTabProvider.notifier).state = 1,
-              child: const Text('اعرض حجوزاتي'),
-            ),
-          ] else ...[
-            Text(
-              day == today ? 'وجبات اليوم' : day == addDays(today, 1) ? 'وجبات الغد' : 'وجبات ${longDate(day)}',
-              key: const Key('meals-day'),
-              style: textTheme.headlineMedium?.copyWith(fontSize: 26),
-            ),
-            if (day != today)
-              Padding(
-                padding: const EdgeInsets.only(top: 4),
-                child: Text(
-                  'انتهى حجز وجبات اليوم. لأيام أخرى افتح حجوزاتي.',
-                  style: textTheme.bodyMedium?.copyWith(color: AppColors.inkMuted),
-                ),
-              ),
+            )
+          else ...[
             const SizedBox(height: 14),
             for (final period in MealPeriod.values)
               if (dayMeals.any((offering) => offering.period == period)) ...[
@@ -112,6 +87,18 @@ class MealsPage extends ConsumerWidget {
                 const SizedBox(height: 4),
               ],
           ],
+          const SizedBox(height: 8),
+          Text(
+            'لحجز الأيام القادمة افتح حجوزاتي.',
+            textAlign: TextAlign.center,
+            style: textTheme.bodyMedium?.copyWith(color: AppColors.inkMuted),
+          ),
+          const SizedBox(height: 8),
+          OutlinedButton(
+            key: const Key('go-bookings'),
+            onPressed: () => ref.read(employeeTabProvider.notifier).state = 1,
+            child: const Text('اعرض حجوزاتي'),
+          ),
         ],
       ),
     );

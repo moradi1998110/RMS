@@ -57,7 +57,7 @@ class SupabaseManagerRepository implements ManagerRepository {
         final rows = await _client
             .from('meals')
             .select('id, name, description, image_path, price, has_salad, has_soft_drink, has_juice, has_vegetables, is_active')
-            .order('name');
+            .order('name', ascending: true);
         return rows.map(ManagerMeal.fromRow).toList();
       });
 
@@ -100,7 +100,7 @@ class SupabaseManagerRepository implements ManagerRepository {
             .from('schedules')
             .select('id, meal_id, period, season, weekdays, repeat_type, start_date, end_date, meals(name)')
             .eq('is_active', true)
-            .order('created_at');
+            .order('created_at', ascending: true);
         return rows.map(ScheduleRow.fromRow).toList();
       });
 
@@ -205,7 +205,7 @@ class SupabaseManagerRepository implements ManagerRepository {
             .eq('status', 'open')
             .gte('pickup_from', start.toUtc().toIso8601String())
             .lt('pickup_from', addDays(start, 1).toUtc().toIso8601String())
-            .order('pickup_from');
+            .order('pickup_from', ascending: true);
         return offerings.map((row) {
           final statuses = (row['bookings'] as List).map((booking) => (booking as Map<String, dynamic>)['status']).toList();
           int count(String status) => statuses.where((value) => value == status).length;
@@ -264,7 +264,7 @@ class SupabaseManagerRepository implements ManagerRepository {
               .select('status, restaurant_id, amount, meal_offerings!inner(service_date, period, meals(name))')
               .gte('meal_offerings.service_date', isoDate(start))
               .lt('meal_offerings.service_date', isoDate(addDays(start, 7)))
-              .order('id')
+              .order('id', ascending: true)
               .range(rows.length, rows.length + _pageSize - 1);
           rows.addAll(page);
           if (page.length < _pageSize) break;
