@@ -51,8 +51,9 @@ create table public.meal_ratings (
 
 create index meal_ratings_restaurant_idx on public.meal_ratings (restaurant_id, created_at desc);
 
--- Written only through rate_meal.
+-- Written only through rate_meal, so the app is given reading alone.
 alter table public.meal_ratings enable row level security;
+grant select on public.meal_ratings to authenticated;
 create policy meal_ratings_read on public.meal_ratings for select to authenticated
   using (employee_id = auth.uid() or private.is_admin() or private.manages(restaurant_id));
 
