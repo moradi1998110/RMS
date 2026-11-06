@@ -28,6 +28,11 @@ final managerWeekProvider = FutureProvider.autoDispose<ManagerWeek>(
   (ref) => ref.watch(managerRepositoryProvider).week(weekStartOf(DateTime.now())),
 );
 
+final managerRatingsProvider = FutureProvider.autoDispose<RatingSummary>((ref) async {
+  final ratings = await ref.watch(managerRepositoryProvider).ratings(weekStartOf(DateTime.now()));
+  return RatingSummary.from(ratings);
+});
+
 final offeringBookingsProvider = FutureProvider.autoDispose.family<List<TodayBooking>, String>(
   (ref, offeringId) => ref.watch(managerRepositoryProvider).bookingsOf(offeringId),
 );
@@ -48,5 +53,6 @@ void refreshManagerData(WidgetRef ref) {
   ref.invalidate(timeRulesProvider);
   ref.invalidate(todayProvider);
   ref.invalidate(managerWeekProvider);
+  ref.invalidate(managerRatingsProvider);
   ref.invalidate(offeringBookingsProvider);
 }

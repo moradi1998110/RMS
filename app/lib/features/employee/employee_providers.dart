@@ -27,6 +27,10 @@ final transactionsProvider = FutureProvider.autoDispose<List<WalletTx>>(
   (ref) => ref.watch(employeeRepositoryProvider).transactions(),
 );
 
+final ratableMealsProvider = FutureProvider.autoDispose<List<RatableMeal>>(
+  (ref) => ref.watch(employeeRepositoryProvider).ratableMeals(),
+);
+
 final employeeTabProvider = StateProvider.autoDispose<int>((ref) => 0);
 
 /// The day open on the meals page; null until the user or the bookings tab picks one.
@@ -43,4 +47,5 @@ void refreshEmployeeData(WidgetRef ref) {
   ref.invalidate(activeBookingsProvider);
   ref.invalidate(monthBookingsProvider);
   ref.invalidate(transactionsProvider);
+  ref.invalidate(ratableMealsProvider);
 }

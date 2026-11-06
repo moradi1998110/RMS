@@ -27,6 +27,9 @@ abstract class ManagerRepository {
   Future<ScanResult> redeemToken(String token, String key);
   Future<ScanResult> redeemCode(String code, String key);
   Future<ManagerWeek> week(DateTime start);
+
+  /// Ratings sent during the seven days from [start].
+  Future<List<MealRating>> ratings(DateTime start);
   String imageUrl(String path);
 }
 
@@ -267,6 +270,15 @@ class SupabaseManagerRepository implements ManagerRepository {
           if (page.length < _pageSize) break;
         }
         return ManagerWeek.from(start, rows.map(ManagerWeekRow.fromRow).toList());
+      });
+
+  @override
+  Future<List<MealRating>> ratings(DateTime start) => _guard(() async {
+        final rows = await _client.rpc('meal_ratings_between', params: {
+          'p_from': start.toUtc().toIso8601String(),
+          'p_until': addDays(start, 7).toUtc().toIso8601String(),
+        }) as List;
+        return [for (final row in rows) MealRating.fromRow(row as Map<String, dynamic>)];
       });
 
   @override

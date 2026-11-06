@@ -264,9 +264,63 @@ class EmployeeFailure implements Exception {
       'offering_cancelled' => 'ألغى المطعم وجبة${day()}. لم يُخصم شيء.',
       'cancel_deadline_passed' => 'انتهى وقت إلغاء هذه الوجبة.',
       'not_cancellable' => 'لا يمكن إلغاء هذا الحجز الآن.',
+      'rating_closed' => 'انتهى وقت تقييم هذه الوجبة.',
+      'rating_not_open' => 'يبدأ تقييم الوجبة بعد ساعة من استلامها.',
+      'already_rated' => 'قيّمت هذه الوجبة سابقاً.',
+      'not_ratable' => 'لا يمكن تقييم هذه الوجبة.',
+      'invalid_stars' => 'اختر عدد النجوم.',
+      'comment_too_long' => 'التعليق طويل. اختصره إلى 500 حرف.',
       _ => unknown.message,
     });
   }
+}
+
+/// Quick reasons an employee can tap instead of typing. Names match the server.
+enum RatingTag {
+  tasty('tasty', 'لذيذة'),
+  goodPortion('good_portion', 'الكمية مناسبة'),
+  smallPortion('small_portion', 'الكمية قليلة'),
+  cold('cold', 'باردة'),
+  delayed('late', 'تأخر التسليم'),
+  clean('clean', 'نظافة ممتازة');
+
+  const RatingTag(this.code, this.label);
+
+  final String code;
+  final String label;
+
+  static RatingTag? fromCode(String code) => values.where((tag) => tag.code == code).firstOrNull;
+}
+
+/// What each number of stars means, so a choice is never a guess.
+String starsWord(int stars) => const ['', 'سيئة جداً', 'سيئة', 'مقبولة', 'جيدة', 'ممتازة'][stars];
+
+/// A collected meal that can be rated right now.
+class RatableMeal {
+  const RatableMeal({
+    required this.bookingId,
+    required this.mealName,
+    required this.period,
+    required this.serviceDate,
+    required this.pickedUpAt,
+    required this.rateUntil,
+  });
+
+  final String bookingId;
+  final String mealName;
+  final MealPeriod period;
+  final DateTime serviceDate;
+  final DateTime pickedUpAt;
+  final DateTime rateUntil;
+
+  factory RatableMeal.fromRow(Map<String, dynamic> row) => RatableMeal(
+        bookingId: row['booking_id'] as String,
+        mealName: row['meal_name'] as String,
+        period: MealPeriod.values.byName(row['period'] as String),
+        serviceDate: DateTime.parse(row['service_date'] as String),
+        pickedUpAt: DateTime.parse(row['picked_up_at'] as String).toLocal(),
+        rateUntil: DateTime.parse(row['rate_until'] as String).toLocal(),
+      );
 }
 
 /// Later days of the same meal in the same month that can still be booked, starting

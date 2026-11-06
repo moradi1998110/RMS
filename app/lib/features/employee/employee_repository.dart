@@ -18,6 +18,8 @@ abstract class EmployeeRepository {
   Future<CancelResult> cancel(String bookingId, String key);
   Future<CancelResult> cancelSeries(String bookingId, String key);
   Future<List<Pickup>> pickups();
+  Future<List<RatableMeal>> ratableMeals();
+  Future<void> rateMeal({required String bookingId, required int stars, required Set<RatingTag> tags, required String comment, required String key});
   String imageUrl(String path);
 }
 
@@ -104,6 +106,24 @@ class SupabaseEmployeeRepository implements EmployeeRepository {
   Future<List<Pickup>> pickups() => _guard(() async {
         final rows = await _client.rpc('my_pickups') as List;
         return [for (final row in rows) Pickup.fromRow(row as Map<String, dynamic>)];
+      });
+
+  @override
+  Future<List<RatableMeal>> ratableMeals() => _guard(() async {
+        final rows = await _client.rpc('my_ratable_meals') as List;
+        return [for (final row in rows) RatableMeal.fromRow(row as Map<String, dynamic>)];
+      });
+
+  @override
+  Future<void> rateMeal({required String bookingId, required int stars, required Set<RatingTag> tags, required String comment, required String key}) =>
+      _guard(() async {
+        await _client.rpc('rate_meal', params: {
+          'p_booking_id': bookingId,
+          'p_stars': stars,
+          'p_tags': [for (final tag in tags) tag.code],
+          'p_comment': comment.trim(),
+          'p_key': key,
+        });
       });
 
   @override

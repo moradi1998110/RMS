@@ -165,6 +165,11 @@ class FakeManagerRepository implements ManagerRepository {
   @override
   Future<ManagerWeek> week(DateTime start) async => weekValue ?? ManagerWeek.from(start, const []);
 
+  List<MealRating> ratingsValue = const [];
+
+  @override
+  Future<List<MealRating>> ratings(DateTime start) async => ratingsValue;
+
   @override
   String imageUrl(String path) => 'https://example.invalid/$path';
 }
@@ -618,6 +623,37 @@ void main() {
       expect(_keyText(tester, 'week-due'), '6,000 دينار');
       expect(find.text('أكثر الوجبات طلباً هذا الأسبوع'), findsOneWidget);
       expect(find.text('رز'), findsOneWidget);
+      await tester.scrollUntilVisible(find.byKey(const Key('ratings-empty')), 300);
+      expect(find.byKey(const Key('ratings-empty')), findsOneWidget);
+    });
+
+    testWidgets('shows ratings by meal with the low ones first and what people wrote', (tester) async {
+      MealRating rating(String meal, String name, int stars, {String? comment, List<RatingTag> tags = const []}) => MealRating(
+            mealId: meal,
+            mealName: meal,
+            period: MealPeriod.lunch,
+            serviceDate: dayOf(DateTime.now()),
+            employeeName: name,
+            stars: stars,
+            tags: tags,
+            comment: comment,
+            createdAt: DateTime.now(),
+          );
+      final repository = FakeManagerRepository()
+        ..ratingsValue = [
+          rating('كباب', 'سارة', 5),
+          rating('كباب', 'علي', 4),
+          rating('دجاج', 'أحمد', 2, comment: 'كان بارداً', tags: [RatingTag.cold]),
+        ];
+      await _pumpPage(tester, const ReportsTab(), repository);
+      await tester.scrollUntilVisible(find.byKey(const Key('ratings-count')), 300);
+      expect(_keyText(tester, 'ratings-average'), '3.7 من 5');
+      expect(_keyText(tester, 'ratings-count'), '3');
+      expect(tester.getTopLeft(find.text('دجاج')).dy, lessThan(tester.getTopLeft(find.text('كباب')).dy));
+      await tester.scrollUntilVisible(find.text('"كان بارداً"'), 300);
+      expect(find.text('2 من 5 · أحمد'), findsOneWidget);
+      expect(find.text('باردة'), findsOneWidget);
+      expect(find.text('5 من 5 · سارة'), findsNothing);
     });
   });
 

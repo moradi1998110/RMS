@@ -9,6 +9,7 @@ import 'package:rms/features/employee/bookings_page.dart';
 import 'package:rms/features/employee/employee_models.dart';
 import 'package:rms/features/employee/employee_repository.dart';
 import 'package:rms/features/employee/meals_page.dart';
+import 'package:rms/features/employee/rate_sheet.dart';
 import 'package:rms/shared/notice.dart';
 
 import 'fake_employee_repository.dart';
@@ -389,6 +390,94 @@ void main() {
     testWidgets('says so when nothing is published', (tester) async {
       await _pumpPage(tester, const MealsPage(), FakeEmployeeRepository());
       expect(find.text('لم يُنشر برنامج الوجبات بعد.'), findsOneWidget);
+    });
+  });
+
+  group('rating', () {
+    RatableMeal ratable() {
+      final now = DateTime.now();
+      return RatableMeal(
+        bookingId: 'b1',
+        mealName: 'كباب',
+        period: MealPeriod.lunch,
+        serviceDate: dayOf(now),
+        pickedUpAt: now.subtract(const Duration(hours: 1)),
+        rateUntil: now.add(const Duration(hours: 3)),
+      );
+    }
+
+    Future<void> tapKey(WidgetTester tester, String key) async {
+      await tester.ensureVisible(find.byKey(Key(key)));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(Key(key)));
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('a collected meal asks for stars, tags and a comment', (tester) async {
+      final repository = FakeEmployeeRepository()..ratableValue = [ratable()];
+      await _pumpPage(tester, const MealsPage(), repository, height: 1200);
+      expect(find.text('كيف كانت وجبتك؟'), findsOneWidget);
+
+      await tapKey(tester, 'rate-star-b1-4');
+      expect(find.text('قيّم وجبتك'), findsOneWidget);
+      expect(find.text('جيدة'), findsOneWidget);
+      await tapKey(tester, 'star-2');
+      expect(find.text('سيئة'), findsOneWidget);
+      await tapKey(tester, 'tag-cold');
+      await tester.enterText(find.byKey(const Key('rate-comment')), 'الرز بارد');
+      await tester.pumpAndSettle();
+
+      await tester.ensureVisible(find.byKey(const Key('rate-send')));
+      await tester.tap(find.byKey(const Key('rate-send')));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
+      final call = repository.rateCalls.single;
+      expect(call.bookingId, 'b1');
+      expect(call.stars, 2);
+      expect(call.tags, {RatingTag.cold});
+      expect(call.comment, 'الرز بارد');
+      expect(find.text('شكراً لك'), findsOneWidget);
+      await _closeNotice(tester);
+      expect(find.text('كيف كانت وجبتك؟'), findsNothing);
+    });
+
+    testWidgets('sending needs stars first', (tester) async {
+      final repository = FakeEmployeeRepository();
+      await _pumpPage(tester, SingleChildScrollView(child: RateSheet(meal: ratable())), repository, height: 1200);
+      expect(find.text('اختر عدد النجوم'), findsOneWidget);
+      await tapKey(tester, 'rate-send');
+      expect(find.text('اختر عدد النجوم أولاً.'), findsOneWidget);
+      expect(repository.rateCalls, isEmpty);
+    });
+
+    testWidgets('a retry reuses the key and a change starts a new one', (tester) async {
+      final repository = FakeEmployeeRepository()
+        ..ratableValue = [ratable()]
+        ..failNext = EmployeeFailure.network;
+      await _pumpPage(tester, const MealsPage(), repository, height: 1200);
+      await tapKey(tester, 'rate-star-b1-3');
+      await tapKey(tester, 'rate-send');
+      expect(find.text(EmployeeFailure.network.message), findsOneWidget);
+
+      repository.failNext = const EmployeeFailure('انتهى وقت تقييم هذه الوجبة.');
+      await tapKey(tester, 'rate-send');
+      expect(repository.rateCalls[0].key, repository.rateCalls[1].key);
+      expect(find.text('انتهى وقت تقييم هذه الوجبة.'), findsOneWidget);
+
+      await tapKey(tester, 'star-4');
+      await tester.ensureVisible(find.byKey(const Key('rate-send')));
+      await tester.tap(find.byKey(const Key('rate-send')));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
+      expect(repository.rateCalls[2].key, isNot(repository.rateCalls[1].key));
+      await _closeNotice(tester);
+    });
+
+    test('server refusals read as sentences', () {
+      expect(EmployeeFailure.fromServer('rating_closed', const {}).message, 'انتهى وقت تقييم هذه الوجبة.');
+      expect(EmployeeFailure.fromServer('already_rated', const {}).message, 'قيّمت هذه الوجبة سابقاً.');
+      expect(starsWord(1), 'سيئة جداً');
+      expect(RatingTag.fromCode('late'), RatingTag.delayed);
     });
   });
 

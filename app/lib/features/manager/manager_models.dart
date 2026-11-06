@@ -402,6 +402,80 @@ class ManagerWeek {
   }
 }
 
+/// One employee's rating of a collected meal.
+class MealRating {
+  const MealRating({
+    required this.mealId,
+    required this.mealName,
+    required this.period,
+    required this.serviceDate,
+    required this.employeeName,
+    required this.stars,
+    required this.tags,
+    required this.comment,
+    required this.createdAt,
+  });
+
+  final String mealId;
+  final String mealName;
+  final MealPeriod period;
+  final DateTime serviceDate;
+  final String employeeName;
+  final int stars;
+  final List<RatingTag> tags;
+  final String? comment;
+  final DateTime createdAt;
+
+  /// One or two stars: shown in red so the manager notices.
+  bool get isLow => stars <= 2;
+
+  factory MealRating.fromRow(Map<String, dynamic> row) => MealRating(
+        mealId: row['meal_id'] as String,
+        mealName: row['meal_name'] as String,
+        period: MealPeriod.values.byName(row['period'] as String),
+        serviceDate: DateTime.parse(row['service_date'] as String),
+        employeeName: row['employee_name'] as String,
+        stars: (row['stars'] as num).toInt(),
+        tags: (row['tags'] as List? ?? const []).map((code) => RatingTag.fromCode(code as String)).whereType<RatingTag>().toList(),
+        comment: row['comment'] as String?,
+        createdAt: DateTime.parse(row['created_at'] as String).toLocal(),
+      );
+}
+
+/// Averages per meal, lowest first, so the meals that need attention lead.
+class RatingSummary {
+  const RatingSummary({required this.count, required this.average, required this.meals, required this.latest});
+
+  final int count;
+  final double average;
+  final List<({String name, double average, int count})> meals;
+
+  /// Ratings with a comment or a low score, newest first.
+  final List<MealRating> latest;
+
+  factory RatingSummary.from(List<MealRating> ratings) {
+    final byMeal = <String, List<MealRating>>{};
+    for (final rating in ratings) {
+      byMeal.putIfAbsent(rating.mealId, () => []).add(rating);
+    }
+    double averageOf(List<MealRating> list) => list.fold<int>(0, (sum, rating) => sum + rating.stars) / list.length;
+    final meals = [
+      for (final list in byMeal.values) (name: list.first.mealName, average: averageOf(list), count: list.length),
+    ]..sort((a, b) => a.average.compareTo(b.average));
+    final latest = ratings.where((rating) => rating.isLow || (rating.comment ?? '').isNotEmpty || rating.tags.isNotEmpty).toList()
+      ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    return RatingSummary(
+      count: ratings.length,
+      average: ratings.isEmpty ? 0 : averageOf(ratings),
+      meals: meals,
+      latest: latest.take(20).toList(),
+    );
+  }
+}
+
+/// One decimal, the way people say an average: 4.2.
+String averageText(double value) => value.toStringAsFixed(1);
+
 class ManagerWeekRow {
   const ManagerWeekRow({required this.row, required this.mealName, required this.amount});
 

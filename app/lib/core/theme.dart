@@ -30,6 +30,7 @@ class AppColors {
   static const dayCell = Color(0xFFF7F9F8);
   static const pastDay = Color(0xFF5C736E);
   static const unselected = Color(0xFFB7C6C2);
+  static const star = Color(0xFFD98A00);
 }
 
 /// Large text and tall controls throughout: most users are older staff.

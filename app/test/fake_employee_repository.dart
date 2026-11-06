@@ -70,6 +70,19 @@ class FakeEmployeeRepository implements EmployeeRepository {
   @override
   Future<List<Pickup>> pickups() async => pickupsValue;
 
+  List<RatableMeal> ratableValue = const [];
+  final rateCalls = <({String bookingId, int stars, Set<RatingTag> tags, String comment, String key})>[];
+
+  @override
+  Future<List<RatableMeal>> ratableMeals() async => ratableValue;
+
+  @override
+  Future<void> rateMeal({required String bookingId, required int stars, required Set<RatingTag> tags, required String comment, required String key}) async {
+    rateCalls.add((bookingId: bookingId, stars: stars, tags: tags, comment: comment, key: key));
+    _maybeFail();
+    ratableValue = ratableValue.where((meal) => meal.bookingId != bookingId).toList();
+  }
+
   @override
   String imageUrl(String path) => 'https://example.invalid/$path';
 }

@@ -10,6 +10,7 @@ import 'codes_page.dart';
 import 'employee_models.dart';
 import 'employee_providers.dart';
 import 'employee_repository.dart';
+import 'rate_sheet.dart';
 
 class MealsPage extends ConsumerWidget {
   const MealsPage({super.key});
@@ -23,6 +24,12 @@ class MealsPage extends ConsumerWidget {
       title: result.count > 1 ? 'تم حجز ${mealCountObject(result.count)}' : 'تم الحجز',
       text: offering.name,
     );
+  }
+
+  Future<void> _rate(BuildContext context, RatableMeal meal, int stars) async {
+    final saved = await showRateSheet(context, meal, stars: stars);
+    if (saved != true || !context.mounted) return;
+    await showNotice(context, kind: NoticeKind.done, title: 'شكراً لك', text: 'وصل تقييمك إلى المطعم.');
   }
 
   @override
@@ -54,6 +61,8 @@ class MealsPage extends ConsumerWidget {
     final dayMeals = offeringsValue.where((offering) => offering.serviceDate == selected).toList();
     final heldOfferings = {for (final booking in activeValue) booking.offeringId};
     final next = nextBooking(activeValue, now);
+    // Ratings never hold up the page; they appear once they load.
+    final toRate = ref.watch(ratableMealsProvider).valueOrNull ?? const <RatableMeal>[];
 
     return RefreshIndicator(
       onRefresh: () async {
@@ -64,6 +73,10 @@ class MealsPage extends ConsumerWidget {
         padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
         children: [
           _BalanceCard(wallet: walletValue),
+          for (final meal in toRate) ...[
+            const SizedBox(height: 16),
+            _RateCard(meal: meal, now: now, onPick: (stars) => _rate(context, meal, stars)),
+          ],
           if (next != null) ...[
             const SizedBox(height: 16),
             _NextMealCard(booking: next, today: today),
@@ -133,6 +146,44 @@ class _BalanceCard extends StatelessWidget {
             Text('محجوز لوجباتك: ${dinars(wallet.held)}'),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _RateCard extends StatelessWidget {
+  const _RateCard({required this.meal, required this.now, required this.onPick});
+
+  final RatableMeal meal;
+  final DateTime now;
+  final ValueChanged<int> onPick;
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    return Container(
+      key: Key('rate-${meal.bookingId}'),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.warningSoft,
+        border: Border.all(color: AppColors.star, width: 2),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text('كيف كانت وجبتك؟', style: textTheme.titleMedium?.copyWith(fontSize: 22)),
+          const SizedBox(height: 4),
+          Text('${meal.mealName} · ${meal.period.label} ${relativeDay(dayOf(meal.pickedUpAt), dayOf(now))}', style: textTheme.bodyMedium),
+          const SizedBox(height: 8),
+          StarRow(stars: 0, onPick: onPick, keyPrefix: 'rate-star-${meal.bookingId}'),
+          const SizedBox(height: 4),
+          Text(
+            'يمكنك التقييم حتى ${relativeDay(dayOf(meal.rateUntil), dayOf(now))} ${clock(meal.rateUntil)}',
+            textAlign: TextAlign.center,
+            style: const TextStyle(fontSize: 16, color: AppColors.onWarningSoft),
+          ),
+        ],
       ),
     );
   }
