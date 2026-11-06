@@ -78,4 +78,9 @@ jobs:
           git switch --orphan deploy-results
           git add -f ./*.log
           git commit -q -m "Deploy logs for ${{ github.sha }}"
-          git push -f origin deploy-results
+          # GitHub sometimes refuses a push for a moment, so try again before failing.
+          for attempt in 1 2 3 4 5; do
+            git push -f origin deploy-results && break
+            [ "$attempt" = 5 ] && exit 1
+            sleep $((attempt * 10))
+          done
