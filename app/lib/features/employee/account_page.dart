@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/format.dart';
 import '../../core/theme.dart';
 import '../../shared/app_sheet.dart';
+import 'delegates_sheet.dart';
 import 'employee_models.dart';
 import 'employee_providers.dart';
 
@@ -41,6 +42,22 @@ class AccountPage extends ConsumerWidget {
               const SizedBox(width: 10),
               Expanded(child: _BalanceTile(label: 'محجوز', amount: walletValue.held, strong: false)),
             ],
+          ),
+          const SizedBox(height: 14),
+          // Also here, since the meals page shows the button only with a meal coming up.
+          Container(
+            padding: const EdgeInsets.fromLTRB(14, 8, 8, 8),
+            decoration: BoxDecoration(
+              color: AppColors.surface,
+              border: Border.all(color: AppColors.line),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Row(
+              children: [
+                Expanded(child: Text('من يستلم وجباتي', style: textTheme.titleMedium)),
+                const DelegatesButton(),
+              ],
+            ),
           ),
           const SizedBox(height: 18),
           Text('حركات حسابك', style: textTheme.titleMedium?.copyWith(fontSize: 22)),

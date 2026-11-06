@@ -33,7 +33,7 @@ class _CodesPageState extends ConsumerState<CodesPage> {
   void initState() {
     super.initState();
     _load();
-    // A scanned meal drops off the server's list, which is how this page learns of it.
+    // A meal collected by anyone, me or a colleague, comes back without its code.
     _poll = Timer.periodic(const Duration(seconds: 5), (_) => _load());
   }
 
@@ -55,17 +55,20 @@ class _CodesPageState extends ConsumerState<CodesPage> {
           final start = latest.indexWhere((pickup) => pickup.bookingId == widget.startBookingId);
           _index = start < 0 ? 0 : start;
         } else {
-          // A code that left the list was scanned, unless its pickup time ran out.
-          final live = {for (final pickup in latest) pickup.bookingId};
+          // Cards keep their place, so the one on screen never jumps to another meal.
+          final byId = {for (final pickup in latest) pickup.bookingId: pickup};
           final now = DateTime.now();
-          for (final pickup in known.where((pickup) => !live.contains(pickup.bookingId))) {
+          for (final pickup in known.where((pickup) => !byId.containsKey(pickup.bookingId))) {
+            // Gone from the list: its pickup time ran out, or I lost access to it.
             if (_collected.contains(pickup.bookingId) || _expired.contains(pickup.bookingId)) continue;
             (now.isBefore(pickup.pickupUntil) ? _collected : _expired).add(pickup.bookingId);
           }
-          // A delegated meal can open while this page is up.
           final shown = {for (final pickup in known) pickup.bookingId};
-          final added = latest.where((pickup) => !shown.contains(pickup.bookingId)).toList();
-          if (added.isNotEmpty) _pickups = [...known, ...added];
+          _pickups = [
+            for (final pickup in known) byId[pickup.bookingId] ?? pickup,
+            // A delegated meal can open while this page is up.
+            ...latest.where((pickup) => !shown.contains(pickup.bookingId)),
+          ];
         }
       });
     } on EmployeeFailure {
@@ -166,8 +169,10 @@ class _CodesPageState extends ConsumerState<CodesPage> {
       );
     }
     final pickup = pickups[_index];
-    final collected = _collected.contains(pickup.bookingId);
-    final expired = _expired.contains(pickup.bookingId);
+    final collected = pickup.collected || _collected.contains(pickup.bookingId);
+    final expired = !collected && _expired.contains(pickup.bookingId);
+    final pickedUpAt = pickup.pickedUpAt;
+    final pickedUpBy = pickup.pickedUpByName;
     return SingleChildScrollView(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -184,12 +189,31 @@ class _CodesPageState extends ConsumerState<CodesPage> {
             Container(
               key: const Key('code-done'),
               height: 280,
+              padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(color: AppColors.primarySoft, borderRadius: BorderRadius.circular(20)),
-              child: const Column(
+              child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.check_rounded, size: 72, color: AppColors.onPrimarySoft),
-                  Text('تم الاستلام', style: TextStyle(fontSize: 24, fontWeight: FontWeight.w700, color: AppColors.onPrimarySoft)),
+                  const Icon(Icons.check_circle_rounded, size: 80, color: AppColors.onPrimarySoft),
+                  const Text('تم الاستلام', style: TextStyle(fontSize: 26, fontWeight: FontWeight.w700, color: AppColors.onPrimarySoft)),
+                  if (pickedUpAt != null || pickedUpBy != null) ...[
+                    const SizedBox(height: 6),
+                    Text(
+                      [
+                        if (pickedUpAt != null) 'الساعة ${clock(pickedUpAt)}',
+                        if (pickedUpBy != null) 'بواسطة $pickedUpBy',
+                      ].join(' '),
+                      key: const Key('code-done-by'),
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: AppColors.onPrimarySoft),
+                    ),
+                  ],
+                  const SizedBox(height: 6),
+                  const Text(
+                    'الباركود لم يعد صالحاً لأي أحد.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 17, color: AppColors.onPrimarySoft),
+                  ),
                 ],
               ),
             )
@@ -205,7 +229,7 @@ class _CodesPageState extends ConsumerState<CodesPage> {
             Center(
               child: QrImageView(
                 key: const Key('code-qr'),
-                data: pickup.token,
+                data: pickup.token!,
                 size: 280,
                 backgroundColor: AppColors.surface,
               ),
@@ -214,7 +238,7 @@ class _CodesPageState extends ConsumerState<CodesPage> {
             Text.rich(
               TextSpan(children: [
                 const TextSpan(text: 'الرمز الاحتياطي: '),
-                TextSpan(text: pickup.shortCode, style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w700, letterSpacing: 2)),
+                TextSpan(text: pickup.shortCode ?? '', style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w700, letterSpacing: 2)),
               ]),
               key: const Key('code-short'),
               textAlign: TextAlign.center,

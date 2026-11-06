@@ -740,6 +740,39 @@ void main() {
       expect(find.byKey(const Key('code-done')), findsNothing);
     });
 
+    testWidgets('a meal collected by a colleague shows who took it and when, in place of the code', (tester) async {
+      final employee = FakeEmployeeRepository()..pickupsValue = [pickup('1', mine: false), pickup('2')];
+      await _pumpPage(tester, const CodesPage(), FakeManagerRepository(), employee: employee);
+      expect(find.byKey(const Key('code-qr')), findsOneWidget);
+
+      final at = DateTime.now().subtract(const Duration(minutes: 2));
+      final first = pickup('1', mine: false);
+      employee.pickupsValue = [
+        Pickup(
+          bookingId: first.bookingId,
+          token: null,
+          shortCode: null,
+          isMine: false,
+          ownerName: first.ownerName,
+          mealName: first.mealName,
+          pickupFrom: first.pickupFrom,
+          pickupUntil: first.pickupUntil,
+          pickedUpAt: at,
+          pickedUpByName: 'أحمد علي',
+        ),
+        pickup('2'),
+      ];
+      await tester.pump(const Duration(seconds: 6));
+      await tester.pump();
+      expect(_keyText(tester, 'code-counter'), '1 من 2');
+      expect(find.byKey(const Key('code-qr')), findsNothing);
+      expect(find.byKey(const Key('code-done')), findsOneWidget);
+      expect(_keyText(tester, 'code-done-by'), 'الساعة ${clock(at)} بواسطة أحمد علي');
+
+      await _tapKey(tester, 'code-next');
+      expect(find.byKey(const Key('code-qr')), findsOneWidget);
+    });
+
     testWidgets('a delegated meal that opens later joins the codes', (tester) async {
       final employee = FakeEmployeeRepository()..pickupsValue = [pickup('1')];
       await _pumpPage(tester, const CodesPage(), FakeManagerRepository(), employee: employee);

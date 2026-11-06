@@ -18,6 +18,12 @@ abstract class EmployeeRepository {
   Future<CancelResult> cancel(String bookingId, String key);
   Future<CancelResult> cancelSeries(String bookingId, String key);
   Future<List<Pickup>> pickups();
+  Future<List<Delegate>> delegates();
+
+  /// Null when no colleague at my restaurant has this username.
+  Future<Colleague?> findColleague(String username);
+  Future<void> addDelegate(String username, String key);
+  Future<void> removeDelegate(String delegationId);
   Future<List<RatableMeal>> ratableMeals();
   Future<void> rateMeal({required String bookingId, required int stars, required Set<RatingTag> tags, required String comment, required String key});
   String imageUrl(String path);
@@ -106,6 +112,28 @@ class SupabaseEmployeeRepository implements EmployeeRepository {
   Future<List<Pickup>> pickups() => _guard(() async {
         final rows = await _client.rpc('my_pickups') as List;
         return [for (final row in rows) Pickup.fromRow(row as Map<String, dynamic>)];
+      });
+
+  @override
+  Future<List<Delegate>> delegates() => _guard(() async {
+        final rows = await _client.rpc('my_delegates') as List;
+        return [for (final row in rows) Delegate.fromRow(row as Map<String, dynamic>)];
+      });
+
+  @override
+  Future<Colleague?> findColleague(String username) => _guard(() async {
+        final row = await _client.rpc('find_colleague', params: {'p_username': username.trim()});
+        return row == null ? null : Colleague.fromRow(row as Map<String, dynamic>);
+      });
+
+  @override
+  Future<void> addDelegate(String username, String key) => _guard(() async {
+        await _client.rpc('set_delegation', params: {'p_delegate_username': username.trim(), 'p_booking_id': null, 'p_key': key});
+      });
+
+  @override
+  Future<void> removeDelegate(String delegationId) => _guard(() async {
+        await _client.rpc('revoke_delegation', params: {'p_delegation_id': delegationId});
       });
 
   @override

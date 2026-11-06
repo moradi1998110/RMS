@@ -456,6 +456,106 @@ void main() {
     });
   });
 
+  group('delegation', () {
+    const ahmed = Colleague(username: 'ahmed', fullName: 'أحمد علي', department: 'الصيدلية');
+    Delegate delegate(String name, {String? fullName}) =>
+        Delegate(delegationId: 'd-$name', username: name, fullName: fullName ?? 'زميل $name');
+
+    Future<void> openSheet(WidgetTester tester) async {
+      await tester.tap(find.byKey(const Key('delegates-open')).first);
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('the next meal card shows who can collect, with their initials', (tester) async {
+      final tomorrow = addDays(dayOf(DateTime.now()), 1);
+      final repository = FakeEmployeeRepository(
+        offeringsValue: [_offering('mine', tomorrow)],
+        bookingsValue: [_booking('b1', tomorrow, offeringId: 'mine')],
+      )..delegatesValue = [delegate('ahmed', fullName: 'أحمد علي'), delegate('saad', fullName: 'سعد كريم')];
+      await _pumpPage(tester, const MealsPage(), repository, height: 1400);
+      expect(find.byKey(const Key('delegates-open')), findsOneWidget);
+      expect(find.text('أع'), findsOneWidget);
+      expect(find.text('سك'), findsOneWidget);
+
+      await openSheet(tester);
+      expect(find.text('من يستلم وجباتي'), findsWidgets);
+      expect(find.text('أحمد علي'), findsOneWidget);
+      expect(find.text('سعد كريم'), findsOneWidget);
+    });
+
+    testWidgets('a colleague is found by username, checked by name, then added', (tester) async {
+      final repository = FakeEmployeeRepository()..colleagues = {'ahmed': ahmed};
+      await _pumpPage(tester, const AccountPage(), repository, height: 1400);
+      await openSheet(tester);
+      expect(find.byKey(const Key('delegates-empty')), findsOneWidget);
+
+      await tester.enterText(find.byKey(const Key('delegate-username')), 'Ahmed ');
+      await tester.tap(find.byKey(const Key('delegate-find')));
+      await tester.pumpAndSettle();
+      expect(find.textContaining('أحمد علي'), findsWidgets);
+      expect(find.textContaining('الصيدلية'), findsOneWidget);
+      expect(repository.addDelegateCalls, isEmpty);
+
+      await tester.tap(find.byKey(const Key('delegate-add')));
+      await tester.pumpAndSettle();
+      expect(repository.addDelegateCalls.single.$1, 'ahmed');
+      expect(find.text('أصبح أحمد علي يستطيع استلام وجباتك.'), findsOneWidget);
+      expect(find.byKey(const Key('delegate-remove-d-ahmed')), findsOneWidget);
+      expect(find.byKey(const Key('delegate-username')), findsOneWidget);
+    });
+
+    testWidgets('a second colleague is added next to the first', (tester) async {
+      final repository = FakeEmployeeRepository()
+        ..delegatesValue = [delegate('saad')]
+        ..colleagues = {'ahmed': ahmed};
+      await _pumpPage(tester, const AccountPage(), repository, height: 1400);
+      await openSheet(tester);
+      await tester.enterText(find.byKey(const Key('delegate-username')), 'ahmed');
+      await tester.tap(find.byKey(const Key('delegate-find')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('delegate-add')));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('delegate-remove-d-saad')), findsOneWidget);
+      expect(find.byKey(const Key('delegate-remove-d-ahmed')), findsOneWidget);
+    });
+
+    testWidgets('an unknown username explains and adds nobody', (tester) async {
+      final repository = FakeEmployeeRepository();
+      await _pumpPage(tester, const AccountPage(), repository, height: 1400);
+      await openSheet(tester);
+      await tester.enterText(find.byKey(const Key('delegate-username')), 'nobody');
+      await tester.tap(find.byKey(const Key('delegate-find')));
+      await tester.pumpAndSettle();
+      expect(find.text('لم نجد زميلاً بهذا الاسم في مطعمك. تأكد من اسم المستخدم.'), findsOneWidget);
+      expect(find.byKey(const Key('delegate-add')), findsNothing);
+    });
+
+    testWidgets('withdrawing asks first, then removes only that colleague', (tester) async {
+      final repository = FakeEmployeeRepository()..delegatesValue = [delegate('saad'), delegate('ali')];
+      await _pumpPage(tester, const AccountPage(), repository, height: 1400);
+      await openSheet(tester);
+      await tester.tap(find.byKey(const Key('delegate-remove-d-saad')));
+      await tester.pumpAndSettle();
+      expect(repository.removeDelegateCalls, isEmpty);
+      expect(find.textContaining('إلغاء تخويل زميل saad؟'), findsOneWidget);
+
+      await tester.tap(find.byKey(const Key('delegate-remove-confirm')));
+      await tester.pumpAndSettle();
+      expect(repository.removeDelegateCalls, ['d-saad']);
+      expect(find.byKey(const Key('delegate-remove-d-saad')), findsNothing);
+      expect(find.byKey(const Key('delegate-remove-d-ali')), findsOneWidget);
+    });
+
+    testWidgets('with five chosen it asks to withdraw one before adding', (tester) async {
+      final repository = FakeEmployeeRepository()..delegatesValue = [for (final name in ['a', 'b', 'c', 'd', 'e']) delegate(name)];
+      await _pumpPage(tester, const AccountPage(), repository, height: 1600);
+      expect(find.text('+2'), findsOneWidget);
+      await openSheet(tester);
+      expect(find.byKey(const Key('delegates-full')), findsOneWidget);
+      expect(find.byKey(const Key('delegate-username')), findsNothing);
+    });
+  });
+
   group('rating', () {
     RatableMeal ratable() {
       final now = DateTime.now();

@@ -270,6 +270,11 @@ class EmployeeFailure implements Exception {
       'not_ratable' => 'لا يمكن تقييم هذه الوجبة.',
       'invalid_stars' => 'اختر عدد النجوم.',
       'comment_too_long' => 'التعليق طويل. اختصره إلى 500 حرف.',
+      'colleague_not_found' => 'لم نجد زميلاً بهذا الاسم في مطعمك. تأكد من اسم المستخدم.',
+      'cannot_delegate_to_self' => 'هذا اسم المستخدم الخاص بك. اكتب اسم زميلك.',
+      'too_many_delegates' => 'يمكنك اختيار $maxDelegates زملاء كحد أقصى. ألغِ أحدهم أولاً.',
+      'too_many_attempts' => 'محاولات كثيرة. انتظر 10 دقائق ثم حاول مرة أخرى.',
+      'delegation_not_found' => 'هذا الزميل لم يعد في قائمتك.',
       _ => unknown.message,
     });
   }
@@ -392,25 +397,77 @@ class Pickup {
     required this.mealName,
     required this.pickupFrom,
     required this.pickupUntil,
+    this.pickedUpAt,
+    this.pickedUpByName,
   });
 
   final String bookingId;
-  final String token;
-  final String shortCode;
+
+  /// Null once the meal is collected: no code is sent for it any more.
+  final String? token;
+  final String? shortCode;
   final bool isMine;
   final String ownerName;
   final String mealName;
   final DateTime pickupFrom;
   final DateTime pickupUntil;
+  final DateTime? pickedUpAt;
+  final String? pickedUpByName;
+
+  bool get collected => token == null;
 
   factory Pickup.fromRow(Map<String, dynamic> row) => Pickup(
         bookingId: row['booking_id'] as String,
-        token: row['token'] as String,
-        shortCode: row['short_code'] as String,
+        token: row['token'] as String?,
+        shortCode: row['short_code'] as String?,
         isMine: row['is_mine'] as bool,
         ownerName: row['owner_name'] as String,
         mealName: row['meal_name'] as String,
         pickupFrom: DateTime.parse(row['pickup_from'] as String).toLocal(),
         pickupUntil: DateTime.parse(row['pickup_until'] as String).toLocal(),
+        pickedUpAt: row['picked_up_at'] == null ? null : DateTime.parse(row['picked_up_at'] as String).toLocal(),
+        pickedUpByName: row['picked_up_by_name'] as String?,
       );
 }
+
+/// A colleague who can collect any of my meals once its pickup starts.
+class Delegate {
+  const Delegate({required this.delegationId, required this.username, required this.fullName, this.department});
+
+  final String delegationId;
+  final String username;
+  final String fullName;
+  final String? department;
+
+  /// Two letters for the small round picture: the first of each of the first two names.
+  String get initials {
+    final words = fullName.trim().split(RegExp(r'\s+')).where((word) => word.isNotEmpty).toList();
+    if (words.isEmpty) return '؟';
+    return words.take(2).map((word) => String.fromCharCode(word.runes.first)).join();
+  }
+
+  factory Delegate.fromRow(Map<String, dynamic> row) => Delegate(
+        delegationId: row['delegation_id'] as String,
+        username: row['username'] as String,
+        fullName: row['full_name'] as String,
+        department: row['department'] as String?,
+      );
+}
+
+/// A colleague found by username, shown so the employee can check before choosing.
+class Colleague {
+  const Colleague({required this.username, required this.fullName, this.department});
+
+  final String username;
+  final String fullName;
+  final String? department;
+
+  factory Colleague.fromRow(Map<String, dynamic> row) => Colleague(
+        username: row['username'] as String,
+        fullName: row['full_name'] as String,
+        department: row['department'] as String?,
+      );
+}
+
+/// At most this many colleagues at once; the server holds the same limit.
+const maxDelegates = 5;

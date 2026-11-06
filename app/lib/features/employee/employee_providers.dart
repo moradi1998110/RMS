@@ -31,6 +31,10 @@ final ratableMealsProvider = FutureProvider.autoDispose<List<RatableMeal>>(
   (ref) => ref.watch(employeeRepositoryProvider).ratableMeals(),
 );
 
+final delegatesProvider = FutureProvider.autoDispose<List<Delegate>>(
+  (ref) => ref.watch(employeeRepositoryProvider).delegates(),
+);
+
 final employeeTabProvider = StateProvider.autoDispose<int>((ref) => 0);
 
 final calendarMonthProvider = StateProvider.autoDispose<DateTime>((ref) {
@@ -45,4 +49,5 @@ void refreshEmployeeData(WidgetRef ref) {
   ref.invalidate(monthBookingsProvider);
   ref.invalidate(transactionsProvider);
   ref.invalidate(ratableMealsProvider);
+  ref.invalidate(delegatesProvider);
 }

@@ -6,6 +6,7 @@ import '../../core/theme.dart';
 import '../../shared/app_sheet.dart';
 import '../../shared/notice.dart';
 import 'codes_page.dart';
+import 'delegates_sheet.dart';
 import 'employee_models.dart';
 import 'employee_providers.dart';
 import 'meal_card.dart';
@@ -194,9 +195,23 @@ class _NextMealCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('وجبتك القادمة', style: textTheme.bodyMedium?.copyWith(color: AppColors.inkMuted, fontWeight: FontWeight.w500)),
-          const SizedBox(height: 4),
-          Text(booking.mealName, style: textTheme.titleMedium?.copyWith(fontSize: 22)),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('وجبتك القادمة', style: textTheme.bodyMedium?.copyWith(color: AppColors.inkMuted, fontWeight: FontWeight.w500)),
+                    const SizedBox(height: 4),
+                    Text(booking.mealName, style: textTheme.titleMedium?.copyWith(fontSize: 22)),
+                  ],
+                ),
+              ),
+              // At the top left in Arabic: who else can collect this meal.
+              const DelegatesButton(),
+            ],
+          ),
           const SizedBox(height: 4),
           Text('استلمها $pickupDay ${clockRange(booking.pickupFrom, booking.pickupUntil)}', style: textTheme.bodyMedium),
           if (!booking.pickupOpenAt(DateTime.now()))

@@ -71,6 +71,38 @@ class FakeEmployeeRepository implements EmployeeRepository {
   @override
   Future<List<Pickup>> pickups() async => pickupsValue;
 
+  List<Delegate> delegatesValue = const [];
+  Map<String, Colleague> colleagues = const {};
+  final addDelegateCalls = <(String, String)>[];
+  final removeDelegateCalls = <String>[];
+
+  @override
+  Future<List<Delegate>> delegates() async => delegatesValue;
+
+  @override
+  Future<Colleague?> findColleague(String username) async {
+    _maybeFail();
+    return colleagues[username.trim().toLowerCase()];
+  }
+
+  @override
+  Future<void> addDelegate(String username, String key) async {
+    addDelegateCalls.add((username, key));
+    _maybeFail();
+    final colleague = colleagues[username]!;
+    delegatesValue = [
+      ...delegatesValue,
+      Delegate(delegationId: 'd-${colleague.username}', username: colleague.username, fullName: colleague.fullName, department: colleague.department),
+    ];
+  }
+
+  @override
+  Future<void> removeDelegate(String delegationId) async {
+    removeDelegateCalls.add(delegationId);
+    _maybeFail();
+    delegatesValue = delegatesValue.where((delegate) => delegate.delegationId != delegationId).toList();
+  }
+
   List<RatableMeal> ratableValue = const [];
   final rateCalls = <({String bookingId, int stars, Set<RatingTag> tags, String comment, String key})>[];
 
