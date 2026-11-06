@@ -4,11 +4,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/format.dart';
 import '../../core/theme.dart';
 import '../../shared/app_sheet.dart';
-import '../../shared/notice.dart';
-import 'cancel_sheet.dart';
 import 'codes_page.dart';
 import 'employee_models.dart';
 import 'employee_providers.dart';
+import 'meal_card.dart';
 
 const _usualPeriods = [MealPeriod.breakfast, MealPeriod.lunch, MealPeriod.dinner];
 const _ramadanPeriods = [MealPeriod.suhoor, MealPeriod.iftar];
@@ -274,25 +273,6 @@ class _DaySheet extends ConsumerWidget {
 
   final DateTime day;
 
-  Future<void> _cancel(BuildContext context, Booking booking) async {
-    final navigator = Navigator.of(context);
-    final result = await showCancelSheet(context, booking);
-    if (result == null || !navigator.mounted) return;
-    navigator.pop();
-    await showNotice(
-      navigator.context,
-      kind: NoticeKind.refund,
-      title: result.count > 1 ? 'أُلغيت ${mealCount(result.count)}' : 'أُلغي الحجز',
-      text: 'رجع ${dinars(result.refunded)} إلى رصيدك',
-    );
-  }
-
-  void _goBook(BuildContext context, WidgetRef ref) {
-    ref.read(mealsDayProvider.notifier).state = day;
-    ref.read(employeeTabProvider.notifier).state = 0;
-    Navigator.of(context).pop();
-  }
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final now = DateTime.now();
@@ -331,8 +311,7 @@ class _DaySheet extends ConsumerWidget {
             past: day.isBefore(today),
             published: published,
             now: now,
-            onCancel: (booking) => _cancel(context, booking),
-            onBook: () => _goBook(context, ref),
+            onCancel: (booking) => cancelAndTell(context, booking),
           ),
         ],
       ],
@@ -349,7 +328,6 @@ class _PeriodGroup extends StatelessWidget {
     required this.published,
     required this.now,
     required this.onCancel,
-    required this.onBook,
   });
 
   final MealPeriod period;
@@ -359,7 +337,6 @@ class _PeriodGroup extends StatelessWidget {
   final bool published;
   final DateTime now;
   final ValueChanged<Booking> onCancel;
-  final VoidCallback onBook;
 
   String get _emptyText {
     if (past) return 'لا يوجد حجز.';
@@ -371,9 +348,9 @@ class _PeriodGroup extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final canBook = offerings.any((offering) => offering.isOpenAt(now));
     final held = {for (final booking in bookings) if (booking.status != BookingStatus.cancelledByRestaurant) booking.offeringId};
-    final moreToBook = offerings.any((offering) => offering.isOpenAt(now) && !held.contains(offering.id));
+    // Meals of this period not yet booked, each with its own book button right here.
+    final toBook = past ? const <Offering>[] : offerings.where((offering) => !held.contains(offering.id)).toList();
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
@@ -396,10 +373,10 @@ class _PeriodGroup extends StatelessWidget {
             _BookingDetails(booking: booking, now: now, onCancel: () => onCancel(booking)),
             const SizedBox(height: 10),
           ],
-          if (bookings.isEmpty) Text(_emptyText, style: const TextStyle(fontSize: 17, color: AppColors.inkMuted)),
-          if (bookings.isEmpty ? canBook : moreToBook) ...[
+          if (bookings.isEmpty && toBook.isEmpty) Text(_emptyText, style: const TextStyle(fontSize: 17, color: AppColors.inkMuted)),
+          for (final offering in toBook) ...[
+            MealCard(offering: offering, booking: null, now: now, showImage: false),
             const SizedBox(height: 10),
-            OutlinedButton(onPressed: onBook, child: Text('احجز ${period.label}')),
           ],
         ],
       ),

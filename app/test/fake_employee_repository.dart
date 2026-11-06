@@ -55,6 +55,7 @@ class FakeEmployeeRepository implements EmployeeRepository {
   Future<CancelResult> cancel(String bookingId, String key) async {
     cancelCalls.add((bookingId, key));
     _maybeFail();
+    bookingsValue = bookingsValue.where((booking) => booking.id != bookingId).toList();
     return const CancelResult(count: 1, refunded: 6000);
   }
 

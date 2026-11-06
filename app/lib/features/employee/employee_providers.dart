@@ -33,9 +33,6 @@ final ratableMealsProvider = FutureProvider.autoDispose<List<RatableMeal>>(
 
 final employeeTabProvider = StateProvider.autoDispose<int>((ref) => 0);
 
-/// The day open on the meals page; null until the user or the bookings tab picks one.
-final mealsDayProvider = StateProvider.autoDispose<DateTime?>((ref) => null);
-
 final calendarMonthProvider = StateProvider.autoDispose<DateTime>((ref) {
   final now = DateTime.now();
   return DateTime(now.year, now.month);
