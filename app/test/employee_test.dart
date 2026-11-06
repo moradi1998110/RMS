@@ -80,7 +80,7 @@ Booking _booking(
   );
 }
 
-Future<void> _pumpPage(WidgetTester tester, Widget page, FakeEmployeeRepository repository, {double height = 844}) async {
+Future<void> _pumpPage(WidgetTester tester, Widget page, FakeEmployeeRepository repository, {double height = 1100}) async {
   tester.view.physicalSize = Size(1170, height * 3);
   tester.view.devicePixelRatio = 3;
   addTearDown(tester.view.reset);
