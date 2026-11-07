@@ -24,7 +24,7 @@ class MealsPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final wallet = ref.watch(walletProvider);
-    final offerings = ref.watch(offeringsProvider);
+    final offerings = ref.watch(todayOfferingsProvider);
     final active = ref.watch(activeBookingsProvider);
     final walletValue = wallet.valueOrNull;
     final offeringsValue = offerings.valueOrNull;

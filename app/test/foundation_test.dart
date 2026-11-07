@@ -12,6 +12,7 @@ import 'package:rms/features/auth/auth_models.dart';
 import 'package:rms/features/auth/auth_repository.dart';
 import 'package:rms/features/auth/change_password_screen.dart';
 import 'package:rms/features/auth/login_screen.dart';
+import 'package:rms/features/employee/account_page.dart';
 import 'package:rms/features/employee/employee_repository.dart';
 import 'package:rms/features/employee/employee_shell.dart';
 import 'package:rms/shared/notice.dart';
@@ -279,6 +280,19 @@ void main() {
       await tester.tap(find.text('حسابي').first);
       await tester.pumpAndSettle();
       expect(tester.widget<IndexedStack>(find.byType(IndexedStack)).index, 2);
+    });
+
+    testWidgets('a page is built only once opened, then kept', (tester) async {
+      final repository = FakeAuthRepository(session: true, profile: _employee);
+      await tester.pumpWidget(_app(const EmployeeShell(), repository));
+      await tester.pumpAndSettle();
+      expect(find.byType(AccountPage, skipOffstage: false), findsNothing);
+      await tester.tap(find.text('حسابي').first);
+      await tester.pumpAndSettle();
+      expect(find.byType(AccountPage, skipOffstage: false), findsOneWidget);
+      await tester.tap(find.text('الوجبات').first);
+      await tester.pumpAndSettle();
+      expect(find.byType(AccountPage, skipOffstage: false), findsOneWidget);
     });
 
     testWidgets('signing out asks first', (tester) async {

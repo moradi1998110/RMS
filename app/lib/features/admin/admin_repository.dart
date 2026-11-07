@@ -86,14 +86,9 @@ class SupabaseAdminRepository implements AdminRepository {
 
   @override
   Future<List<WeekRow>> weekRows(DateTime start) => _guard(() async {
-        final rows = await _allPages((from, to) => _client
-            .from('bookings')
-            .select('status, restaurant_id, meal_offerings!inner(service_date, period)')
-            .gte('meal_offerings.service_date', isoDate(start))
-            .lt('meal_offerings.service_date', isoDate(addDays(start, 7)))
-            .order('id', ascending: true)
-            .range(from, to));
-        return rows.map(WeekRow.fromRow).toList();
+        // Counted on the server: a few hundred rows instead of every booking of the week.
+        final rows = await _client.rpc('booking_week_counts', params: {'p_start': isoDate(start)}) as List;
+        return [for (final row in rows) WeekRow.fromRow(row as Map<String, dynamic>)];
       });
 
   @override

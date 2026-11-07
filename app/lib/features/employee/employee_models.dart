@@ -469,5 +469,8 @@ class Colleague {
       );
 }
 
+/// Movements shown on the account page before "show more".
+const transactionsPage = 30;
+
 /// At most this many colleagues at once; the server holds the same limit.
 const maxDelegates = 5;

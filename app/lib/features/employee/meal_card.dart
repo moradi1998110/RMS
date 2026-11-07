@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/format.dart';
 import '../../core/theme.dart';
+import '../../shared/meal_image.dart';
 import '../../shared/notice.dart';
 import 'book_sheet.dart';
 import 'cancel_sheet.dart';
@@ -84,12 +85,7 @@ class MealCard extends ConsumerWidget {
               height: 120,
               child: imagePath == null
                   ? const _ImagePlaceholder()
-                  : Image.network(
-                      ref.read(employeeRepositoryProvider).imageUrl(imagePath),
-                      fit: BoxFit.cover,
-                      cacheWidth: 800,
-                      errorBuilder: (_, __, ___) => const _ImagePlaceholder(),
-                    ),
+                  : MealImage(url: ref.read(employeeRepositoryProvider).imageUrl(imagePath)),
             ),
           Padding(
             padding: const EdgeInsets.all(14),

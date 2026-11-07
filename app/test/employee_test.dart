@@ -555,6 +555,22 @@ void main() {
       expect(find.byKey(const Key('delegates-full')), findsOneWidget);
       expect(find.byKey(const Key('delegate-username')), findsNothing);
     });
+
+    testWidgets('a list that fails to load says so and can be retried', (tester) async {
+      final repository = FakeEmployeeRepository()
+        ..delegatesValue = [delegate('saad', fullName: 'سعد كريم')]
+        ..delegatesFailures = 1;
+      await _pumpPage(tester, const AccountPage(), repository, height: 1400);
+      expect(find.text('سك'), findsNothing);
+      await openSheet(tester);
+      expect(find.byKey(const Key('delegates-failed')), findsOneWidget);
+
+      await tester.tap(find.byKey(const Key('delegates-retry')));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('delegates-failed')), findsNothing);
+      expect(find.text('سعد كريم'), findsOneWidget);
+      expect(find.text('سك'), findsWidgets);
+    });
   });
 
   group('rating', () {
@@ -741,6 +757,38 @@ void main() {
       expect(find.text('+70,000'), findsOneWidget);
       expect(find.text('حجز رز'), findsOneWidget);
       expect(find.text('-6,000'), findsOneWidget);
+      expect(find.byKey(const Key('tx-more')), findsNothing);
+    });
+
+    testWidgets('shows the latest page of movements, then more on request', (tester) async {
+      final repository = FakeEmployeeRepository(transactionsValue: [
+        for (var day = 1; day <= transactionsPage + 5; day++)
+          WalletTx(type: WalletTxType.topup, availableDelta: day * 1000, heldDelta: 0, createdAt: DateTime(2026, 10, 1).add(Duration(days: day))),
+      ]);
+      await _pumpPage(tester, const AccountPage(), repository, height: 6000);
+      expect(find.text('+$transactionsPage,000'), findsOneWidget);
+      expect(find.text('+${transactionsPage + 1},000'), findsNothing);
+
+      await tester.tap(find.byKey(const Key('tx-more')));
+      await tester.pumpAndSettle();
+      expect(find.text('+${transactionsPage + 5},000'), findsOneWidget);
+      expect(find.byKey(const Key('tx-more')), findsNothing);
+    });
+  });
+
+  group('loading only what is shown', () {
+    testWidgets('the meals page asks for today alone', (tester) async {
+      final repository = FakeEmployeeRepository();
+      await _pumpPage(tester, const MealsPage(), repository);
+      final today = dayOf(DateTime.now());
+      expect(repository.offeringsCalls, [(today, today)]);
+    });
+
+    testWidgets('my bookings asks for the month on screen, from today', (tester) async {
+      final repository = FakeEmployeeRepository();
+      await _pumpPage(tester, const BookingsPage(), repository);
+      final today = dayOf(DateTime.now());
+      expect(repository.offeringsCalls, [(today, DateTime(today.year, today.month + 1, 0))]);
     });
   });
 }

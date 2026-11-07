@@ -179,22 +179,23 @@ int hijriYearOf(DateTime date) {
 DateTime weekStartOf(DateTime day) => addDays(dayOf(day), -((day.weekday % 7 + 1) % 7));
 
 class WeekRow {
-  const WeekRow({required this.date, required this.period, required this.status, required this.restaurantId});
+  const WeekRow({required this.date, required this.period, required this.status, required this.restaurantId, this.count = 1});
 
   final DateTime date;
   final MealPeriod period;
   final BookingStatus status;
   final String restaurantId;
 
-  factory WeekRow.fromRow(Map<String, dynamic> row) {
-    final offering = row['meal_offerings'] as Map<String, dynamic>;
-    return WeekRow(
-      date: DateTime.parse(offering['service_date'] as String),
-      period: MealPeriod.values.byName(offering['period'] as String),
-      status: parseBookingStatus(row['status'] as String),
-      restaurantId: row['restaurant_id'] as String,
-    );
-  }
+  /// How many bookings this row stands for; the server sends them already counted.
+  final int count;
+
+  factory WeekRow.fromRow(Map<String, dynamic> row) => WeekRow(
+        date: DateTime.parse(row['service_date'] as String),
+        period: MealPeriod.values.byName(row['period'] as String),
+        status: parseBookingStatus(row['status'] as String),
+        restaurantId: row['restaurant_id'] as String,
+        count: (row['bookings'] as num).toInt(),
+      );
 }
 
 class WeekDayCount {
@@ -227,16 +228,16 @@ class WeekSummary {
           final day = addDays(start, offset);
           final lines = [0, 0, 0];
           for (final row in rows) {
-            if (row.date == day && served(row)) lines[row.period.calendarLine]++;
+            if (row.date == day && served(row)) lines[row.period.calendarLine] += row.count;
           }
           return WeekDayCount(day: day, lines: lines);
         }(),
     ];
     final byRestaurant = <String, int>{};
     for (final row in rows.where(served)) {
-      byRestaurant[row.restaurantId] = (byRestaurant[row.restaurantId] ?? 0) + 1;
+      byRestaurant[row.restaurantId] = (byRestaurant[row.restaurantId] ?? 0) + row.count;
     }
-    int count(bool Function(WeekRow) test) => rows.where(test).length;
+    int count(bool Function(WeekRow) test) => rows.where(test).fold(0, (sum, row) => sum + row.count);
     return WeekSummary(
       days: days,
       collected: count((row) => row.status == BookingStatus.pickedUp),

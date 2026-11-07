@@ -30,6 +30,10 @@ class RoleShell extends ConsumerStatefulWidget {
 class _RoleShellState extends ConsumerState<RoleShell> {
   int _selected = 0;
 
+  // A page is built, and fetches its data, only once it is first opened; after that
+  // it stays alive so switching back is instant.
+  final _opened = <int>{};
+
   Future<void> _confirmSignOut() async {
     final confirmed = await showDialog<bool>(
       context: context,
@@ -51,6 +55,7 @@ class _RoleShellState extends ConsumerState<RoleShell> {
     final status = ref.watch(authControllerProvider);
     final name = status is SignedIn ? status.profile.fullName : '';
     final selected = widget.selected ?? _selected;
+    _opened.add(selected);
     return Scaffold(
       body: SafeArea(
         child: Stack(
@@ -72,8 +77,10 @@ class _RoleShellState extends ConsumerState<RoleShell> {
                   child: IndexedStack(
                     index: selected,
                     children: [
-                      for (final page in widget.pages)
-                        Padding(padding: const EdgeInsets.only(bottom: 96), child: page.child),
+                      for (final (index, page) in widget.pages.indexed)
+                        _opened.contains(index)
+                            ? Padding(padding: const EdgeInsets.only(bottom: 96), child: page.child)
+                            : const SizedBox.shrink(),
                     ],
                   ),
                 ),

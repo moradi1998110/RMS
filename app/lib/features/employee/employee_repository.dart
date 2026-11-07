@@ -8,12 +8,14 @@ import 'employee_models.dart';
 
 abstract class EmployeeRepository {
   Future<Wallet> wallet();
-  Future<List<Offering>> offerings(DateTime from);
+  /// Open meals served from [from] to [until], both days included.
+  Future<List<Offering>> offerings(DateTime from, DateTime until);
 
   /// Bookings not cancelled, from this day on.
   Future<List<Booking>> activeBookings(DateTime from);
   Future<List<Booking>> monthBookings(DateTime month);
-  Future<List<WalletTx>> transactions();
+  /// The latest [limit] movements, newest first.
+  Future<List<WalletTx>> transactions({int limit = transactionsPage});
   Future<BookResult> book(List<String> offeringIds, String key);
   Future<CancelResult> cancel(String bookingId, String key);
   Future<CancelResult> cancelSeries(String bookingId, String key);
@@ -48,13 +50,14 @@ class SupabaseEmployeeRepository implements EmployeeRepository {
       });
 
   @override
-  Future<List<Offering>> offerings(DateTime from) => _guard(() async {
+  Future<List<Offering>> offerings(DateTime from, DateTime until) => _guard(() async {
         final rows = await _client
             .from('meal_offerings')
             .select('id, meal_id, service_date, period, price, book_until, cancel_until, pickup_from, pickup_until, '
                 'capacity, booked_count, meals(name, description, image_path, has_salad, has_soft_drink, has_juice, has_vegetables)')
             .eq('status', 'open')
             .gte('service_date', isoDate(from))
+            .lte('service_date', isoDate(until))
             .order('service_date', ascending: true);
         return rows.map(Offering.fromRow).toList();
       });
@@ -81,12 +84,12 @@ class SupabaseEmployeeRepository implements EmployeeRepository {
       });
 
   @override
-  Future<List<WalletTx>> transactions() => _guard(() async {
+  Future<List<WalletTx>> transactions({int limit = transactionsPage}) => _guard(() async {
         final rows = await _client
             .from('wallet_transactions')
             .select('type, available_delta, held_delta, note, created_at, bookings(meal_offerings(meals(name)))')
             .order('id', ascending: false)
-            .limit(100);
+            .limit(limit);
         return rows.map(WalletTx.fromRow).toList();
       });
 

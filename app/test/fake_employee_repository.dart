@@ -31,7 +31,12 @@ class FakeEmployeeRepository implements EmployeeRepository {
   Future<Wallet> wallet() async => walletValue;
 
   @override
-  Future<List<Offering>> offerings(DateTime from) async => offeringsValue;
+  Future<List<Offering>> offerings(DateTime from, DateTime until) async {
+    offeringsCalls.add((from, until));
+    return offeringsValue.where((offering) => !offering.serviceDate.isBefore(from) && !offering.serviceDate.isAfter(until)).toList();
+  }
+
+  final offeringsCalls = <(DateTime, DateTime)>[];
 
   @override
   Future<List<Booking>> activeBookings(DateTime from) async => bookingsValue;
@@ -42,7 +47,7 @@ class FakeEmployeeRepository implements EmployeeRepository {
       .toList();
 
   @override
-  Future<List<WalletTx>> transactions() async => transactionsValue;
+  Future<List<WalletTx>> transactions({int limit = transactionsPage}) async => transactionsValue.take(limit).toList();
 
   @override
   Future<BookResult> book(List<String> offeringIds, String key) async {
@@ -77,7 +82,16 @@ class FakeEmployeeRepository implements EmployeeRepository {
   final removeDelegateCalls = <String>[];
 
   @override
-  Future<List<Delegate>> delegates() async => delegatesValue;
+  Future<List<Delegate>> delegates() async {
+    // Fails this many times first, like a weak connection or a server not yet updated.
+    if (delegatesFailures > 0) {
+      delegatesFailures--;
+      throw EmployeeFailure.network;
+    }
+    return delegatesValue;
+  }
+
+  int delegatesFailures = 0;
 
   @override
   Future<Colleague?> findColleague(String username) async {

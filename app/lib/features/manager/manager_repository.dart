@@ -40,8 +40,6 @@ final managerRepositoryProvider = Provider<ManagerRepository>(
 /// The bucket's own limit is 300 KB. Photos are shrunk when picked, so few reach this.
 const maxImageBytes = 300 * 1024;
 
-const _pageSize = 1000;
-
 class SupabaseManagerRepository implements ManagerRepository {
   SupabaseManagerRepository(this._client);
 
@@ -257,19 +255,9 @@ class SupabaseManagerRepository implements ManagerRepository {
 
   @override
   Future<ManagerWeek> week(DateTime start) => _guard(() async {
-        final rows = <Map<String, dynamic>>[];
-        while (true) {
-          final page = await _client
-              .from('bookings')
-              .select('status, restaurant_id, amount, meal_offerings!inner(service_date, period, meals(name))')
-              .gte('meal_offerings.service_date', isoDate(start))
-              .lt('meal_offerings.service_date', isoDate(addDays(start, 7)))
-              .order('id', ascending: true)
-              .range(rows.length, rows.length + _pageSize - 1);
-          rows.addAll(page);
-          if (page.length < _pageSize) break;
-        }
-        return ManagerWeek.from(start, rows.map(ManagerWeekRow.fromRow).toList());
+        // Counted on the server: a few hundred rows instead of every booking of the week.
+        final rows = await _client.rpc('booking_week_counts', params: {'p_start': isoDate(start)}) as List;
+        return ManagerWeek.from(start, [for (final row in rows) ManagerWeekRow.fromRow(row as Map<String, dynamic>)]);
       });
 
   @override

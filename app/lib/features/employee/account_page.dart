@@ -25,6 +25,9 @@ class AccountPage extends ConsumerWidget {
       );
     }
 
+    final limit = ref.watch(transactionsLimitProvider);
+    final shown = transactionsValue.take(limit).toList();
+    final hasMore = transactionsValue.length > limit;
     final textTheme = Theme.of(context).textTheme;
     return RefreshIndicator(
       onRefresh: () async {
@@ -62,12 +65,18 @@ class AccountPage extends ConsumerWidget {
           const SizedBox(height: 18),
           Text('حركات حسابك', style: textTheme.titleMedium?.copyWith(fontSize: 22)),
           const SizedBox(height: 10),
-          if (transactionsValue.isEmpty)
+          if (shown.isEmpty)
             Text('لا توجد حركات بعد.', style: textTheme.bodyLarge?.copyWith(color: AppColors.inkMuted)),
-          for (final transaction in transactionsValue) ...[
+          for (final transaction in shown) ...[
             _TransactionCard(transaction: transaction),
             const SizedBox(height: 10),
           ],
+          if (hasMore)
+            OutlinedButton(
+              key: const Key('tx-more'),
+              onPressed: transactions.isLoading ? null : () => ref.read(transactionsLimitProvider.notifier).state = limit + transactionsPage,
+              child: Text(transactions.isLoading ? 'جارٍ التحميل...' : 'عرض المزيد'),
+            ),
         ],
       ),
     );

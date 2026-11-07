@@ -187,8 +187,19 @@ class _DelegatesSheetState extends ConsumerState<DelegatesSheet> {
           ),
           const SizedBox(height: 14),
           if (list == null)
-            delegates.hasError
-                ? const Text('تعذّر عرض القائمة. تأكد من الإنترنت.', style: TextStyle(fontSize: 18))
+            delegates.hasError && !delegates.isLoading
+                ? Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      const Text('تعذّر عرض القائمة. تأكد من الإنترنت.', key: Key('delegates-failed'), style: TextStyle(fontSize: 18)),
+                      const SizedBox(height: 8),
+                      OutlinedButton(
+                        key: const Key('delegates-retry'),
+                        onPressed: () => ref.invalidate(delegatesProvider),
+                        child: const Text('حاول مرة أخرى'),
+                      ),
+                    ],
+                  )
                 : const Center(child: CircularProgressIndicator())
           else if (list.isEmpty)
             const Text('لم تختر أحداً بعد.', key: Key('delegates-empty'), style: TextStyle(fontSize: 18))

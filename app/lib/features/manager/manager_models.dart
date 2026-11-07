@@ -390,7 +390,7 @@ class ManagerWeek {
     for (final row in rows) {
       final status = row.row.status;
       if (status == BookingStatus.cancelled || status == BookingStatus.cancelledByRestaurant) continue;
-      counts[row.mealName] = (counts[row.mealName] ?? 0) + 1;
+      counts[row.mealName] = (counts[row.mealName] ?? 0) + row.row.count;
       if (status != BookingStatus.booked) due += row.amount;
     }
     final top = counts.entries.toList()..sort((a, b) => b.value.compareTo(a.value));
@@ -481,14 +481,12 @@ class ManagerWeekRow {
 
   final WeekRow row;
   final String mealName;
+  /// The total of all the bookings in [row].
   final int amount;
 
-  factory ManagerWeekRow.fromRow(Map<String, dynamic> json) {
-    final offering = json['meal_offerings'] as Map<String, dynamic>;
-    return ManagerWeekRow(
-      row: WeekRow.fromRow(json),
-      mealName: (offering['meals'] as Map<String, dynamic>)['name'] as String,
-      amount: (json['amount'] as num).toInt(),
-    );
-  }
+  factory ManagerWeekRow.fromRow(Map<String, dynamic> json) => ManagerWeekRow(
+        row: WeekRow.fromRow(json),
+        mealName: json['meal_name'] as String,
+        amount: (json['amount'] as num).toInt(),
+      );
 }

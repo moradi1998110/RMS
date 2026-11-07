@@ -59,7 +59,7 @@ class _BookSheetState extends ConsumerState<BookSheet> {
     final now = DateTime.now();
     final series = bookableSeries(
       pick,
-      ref.watch(offeringsProvider).valueOrNull ?? const [],
+      ref.watch(monthOfferingsProvider(DateTime(pick.serviceDate.year, pick.serviceDate.month))).valueOrNull ?? const [],
       ref.watch(activeBookingsProvider).valueOrNull ?? const [],
       now,
     );

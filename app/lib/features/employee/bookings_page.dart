@@ -25,6 +25,8 @@ class BookingsPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final month = ref.watch(calendarMonthProvider);
     final bookings = ref.watch(monthBookingsProvider(month));
+    // Loaded with the month on screen, so a day opens with its meals already there.
+    ref.watch(monthOfferingsProvider(month));
     final textTheme = Theme.of(context).textTheme;
 
     void moveMonth(int by) {
@@ -280,7 +282,8 @@ class _DaySheet extends ConsumerWidget {
     final bookings = (ref.watch(monthBookingsProvider(DateTime(day.year, day.month))).valueOrNull ?? const <Booking>[])
         .where((booking) => booking.serviceDate == day)
         .toList();
-    final offerings = ref.watch(offeringsProvider).valueOrNull ?? const <Offering>[];
+    final offeringsAsync = ref.watch(monthOfferingsProvider(DateTime(day.year, day.month)));
+    final offerings = offeringsAsync.valueOrNull ?? const <Offering>[];
     final dayOfferings = offerings.where((offering) => offering.serviceDate == day).toList();
     final published = !day.isBefore(today) && offerings.isNotEmpty && !day.isAfter(offerings.last.serviceDate);
 
@@ -302,6 +305,9 @@ class _DaySheet extends ConsumerWidget {
             ),
           ],
         ),
+        if (offeringsAsync.isLoading && !offeringsAsync.hasValue && !day.isBefore(today))
+          const Padding(padding: EdgeInsets.all(24), child: Center(child: CircularProgressIndicator()))
+        else
         for (final period in ramadan ? _ramadanPeriods : _usualPeriods) ...[
           const SizedBox(height: 12),
           _PeriodGroup(

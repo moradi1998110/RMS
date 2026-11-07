@@ -7,6 +7,7 @@ import '../../core/format.dart';
 import '../../core/theme.dart';
 import '../../shared/app_sheet.dart';
 import '../../shared/error_box.dart';
+import '../../shared/meal_image.dart';
 import '../../shared/notice.dart';
 import 'manager_models.dart';
 import 'manager_providers.dart';
@@ -76,12 +77,7 @@ class _MealCard extends StatelessWidget {
           if (imageUrl != null)
             SizedBox(
               height: 110,
-              child: Image.network(
-                imageUrl!,
-                fit: BoxFit.cover,
-                cacheWidth: 800,
-                errorBuilder: (_, __, ___) => const ColoredBox(color: AppColors.imagePlaceholder),
-              ),
+              child: MealImage(url: imageUrl!),
             ),
           Padding(
             padding: const EdgeInsets.all(14),
@@ -208,7 +204,7 @@ class _MealSheetState extends ConsumerState<MealSheet> {
                 height: 120,
                 child: _image != null
                     ? Image.memory(_image!, key: const Key('meal-photo'), fit: BoxFit.cover)
-                    : Image.network(savedImage!, fit: BoxFit.cover, errorBuilder: (_, __, ___) => const ColoredBox(color: AppColors.imagePlaceholder)),
+                    : MealImage(url: savedImage!),
               ),
             ),
             const SizedBox(height: 8),
