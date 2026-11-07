@@ -1,5 +1,5 @@
 -- Several colleagues can collect one employee's meals; a meal collected by any of them
--- shows as collected to all, and no other code works after that.
+-- shows as collected to all, and no other code works after that, a screenshot included.
 
 begin;
 

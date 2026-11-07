@@ -456,6 +456,7 @@ void main() {
     });
   });
 
+  // Standing delegation only: a chosen colleague can collect any of my meals.
   group('delegation', () {
     const ahmed = Colleague(username: 'ahmed', fullName: 'أحمد علي', department: 'الصيدلية');
     Delegate delegate(String name, {String? fullName}) =>
