@@ -23,7 +23,7 @@ class CodesPage extends ConsumerStatefulWidget {
 
 class _CodesPageState extends ConsumerState<CodesPage> {
   List<Pickup>? _pickups;
-  final _collected = <String>{};
+  final _withdrawn = <String>{};
   final _expired = <String>{};
   int _index = 0;
   bool _failed = false;
@@ -60,8 +60,8 @@ class _CodesPageState extends ConsumerState<CodesPage> {
           final now = DateTime.now();
           for (final pickup in known.where((pickup) => !byId.containsKey(pickup.bookingId))) {
             // Gone from the list: its pickup time ran out, or I lost access to it.
-            if (_collected.contains(pickup.bookingId) || _expired.contains(pickup.bookingId)) continue;
-            (now.isBefore(pickup.pickupUntil) ? _collected : _expired).add(pickup.bookingId);
+            if (_withdrawn.contains(pickup.bookingId) || _expired.contains(pickup.bookingId)) continue;
+            (now.isBefore(pickup.pickupUntil) ? _withdrawn : _expired).add(pickup.bookingId);
           }
           final shown = {for (final pickup in known) pickup.bookingId};
           _pickups = [
@@ -169,8 +169,9 @@ class _CodesPageState extends ConsumerState<CodesPage> {
       );
     }
     final pickup = pickups[_index];
-    final collected = pickup.collected || _collected.contains(pickup.bookingId);
-    final expired = !collected && _expired.contains(pickup.bookingId);
+    final collected = pickup.collected;
+    final withdrawn = !collected && _withdrawn.contains(pickup.bookingId);
+    final expired = !collected && !withdrawn && _expired.contains(pickup.bookingId);
     final pickedUpAt = pickup.pickedUpAt;
     final pickedUpBy = pickup.pickedUpByName;
     return SingleChildScrollView(
@@ -188,7 +189,8 @@ class _CodesPageState extends ConsumerState<CodesPage> {
           if (collected)
             Container(
               key: const Key('code-done'),
-              height: 280,
+              // Grows with a long name or a large phone font instead of cutting the text.
+              constraints: const BoxConstraints(minHeight: 280),
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(color: AppColors.primarySoft, borderRadius: BorderRadius.circular(20)),
               child: Column(
@@ -214,6 +216,22 @@ class _CodesPageState extends ConsumerState<CodesPage> {
                     textAlign: TextAlign.center,
                     style: TextStyle(fontSize: 17, color: AppColors.onPrimarySoft),
                   ),
+                ],
+              ),
+            )
+          else if (withdrawn)
+            Container(
+              key: const Key('code-gone'),
+              constraints: const BoxConstraints(minHeight: 280),
+              padding: const EdgeInsets.all(16),
+              alignment: Alignment.center,
+              decoration: BoxDecoration(color: AppColors.closed, borderRadius: BorderRadius.circular(20)),
+              child: const Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text('لم يعد هذا الباركود صالحاً', textAlign: TextAlign.center, style: TextStyle(fontSize: 24, fontWeight: FontWeight.w700, color: AppColors.inkMuted)),
+                  SizedBox(height: 8),
+                  Text('ألغى صاحب الوجبة التخويل، أو أُلغيت الوجبة.', textAlign: TextAlign.center, style: TextStyle(fontSize: 18, color: AppColors.inkMuted)),
                 ],
               ),
             )

@@ -680,14 +680,15 @@ void main() {
       expect(find.text('وجبتك أنت'), findsOneWidget);
     });
 
-    testWidgets('a scanned meal turns into collected on its own', (tester) async {
-      final employee = FakeEmployeeRepository()..pickupsValue = [pickup('1')];
+    testWidgets('a code withdrawn before its time is not shown as collected', (tester) async {
+      final employee = FakeEmployeeRepository()..pickupsValue = [pickup('1', mine: false)];
       await _pumpPage(tester, const CodesPage(), FakeManagerRepository(), employee: employee);
       expect(find.byKey(const Key('code-qr')), findsOneWidget);
       employee.pickupsValue = const [];
       await tester.pump(const Duration(seconds: 6));
       await tester.pump();
-      expect(find.byKey(const Key('code-done')), findsOneWidget);
+      expect(find.byKey(const Key('code-gone')), findsOneWidget);
+      expect(find.byKey(const Key('code-done')), findsNothing);
       expect(find.byKey(const Key('code-qr')), findsNothing);
     });
 
