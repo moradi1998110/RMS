@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
@@ -5,6 +7,7 @@ import 'package:uuid/uuid.dart';
 import '../../core/theme.dart';
 import '../../shared/app_sheet.dart';
 import '../../shared/error_box.dart';
+import '../../shared/notice.dart';
 import 'employee_models.dart';
 import 'employee_providers.dart';
 import 'employee_repository.dart';
@@ -97,7 +100,6 @@ class _DelegatesSheetState extends ConsumerState<DelegatesSheet> {
   Colleague? _found;
   String? _confirmingRemove;
   String? _error;
-  String? _done;
   bool _busy = false;
 
   // Kept across retries of adding the same colleague.
@@ -114,7 +116,6 @@ class _DelegatesSheetState extends ConsumerState<DelegatesSheet> {
     setState(() {
       _busy = true;
       _error = null;
-      _done = null;
     });
     try {
       await action(ref.read(employeeRepositoryProvider));
@@ -150,8 +151,9 @@ class _DelegatesSheetState extends ConsumerState<DelegatesSheet> {
       setState(() {
         _found = null;
         _username.clear();
-        _done = 'أصبح ${colleague.fullName} يستطيع استلام وجباتك.';
       });
+      // Not awaited: the sheet is usable again while the notice shows.
+      unawaited(showNotice(context, kind: NoticeKind.person, title: 'تم التخويل', text: '${colleague.fullName} يستطيع استلام وجباتك.'));
     });
   }
 
@@ -162,8 +164,8 @@ class _DelegatesSheetState extends ConsumerState<DelegatesSheet> {
       if (!mounted) return;
       setState(() {
         _confirmingRemove = null;
-        _done = 'لم يعد ${delegate.fullName} يستطيع استلام وجباتك.';
       });
+      unawaited(showNotice(context, kind: NoticeKind.done, title: 'أُلغي التخويل', text: 'لم يعد ${delegate.fullName} يستطيع استلام وجباتك.'));
     });
   }
 
@@ -251,15 +253,6 @@ class _DelegatesSheetState extends ConsumerState<DelegatesSheet> {
           if (_error != null) ...[
             const SizedBox(height: 12),
             ErrorBox(_error!),
-          ],
-          if (_done != null) ...[
-            const SizedBox(height: 12),
-            Container(
-              key: const Key('delegates-done'),
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-              decoration: BoxDecoration(color: AppColors.primarySoft, borderRadius: BorderRadius.circular(12)),
-              child: Text(_done!, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: AppColors.onPrimarySoft)),
-            ),
           ],
           const SizedBox(height: 12),
           TextButton(

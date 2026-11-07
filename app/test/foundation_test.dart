@@ -253,16 +253,49 @@ void main() {
       expect(find.text('أُلغي الحجز'), findsNothing);
     });
 
-    testWidgets('vibrates', (tester) async {
-      final calls = <String>[];
-      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (call) async {
-        if (call.method == 'HapticFeedback.vibrate') calls.add(call.method);
-        return null;
-      });
-      await tester.pumpWidget(host((context) => showNotice(context, kind: NoticeKind.done, title: 'تم')));
+    testWidgets('every kind vibrates as it appears, with its own coloured badge', (tester) async {
+      for (final kind in NoticeKind.values) {
+        final calls = <String>[];
+        tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (call) async {
+          if (call.method == 'HapticFeedback.vibrate') calls.add(call.method);
+          return null;
+        });
+        await tester.pumpWidget(host((context) => showNotice(context, kind: kind, title: 'تم')));
+        await tester.tap(find.text('open'));
+        await tester.pump();
+        expect(calls, isNotEmpty, reason: '${kind.name} should vibrate');
+        expect(find.byKey(Key('notice-badge-${kind.name}')), findsOneWidget);
+        await tester.pump(noticeDuration);
+        await tester.pumpAndSettle();
+        await tester.pumpWidget(const SizedBox());
+      }
+    });
+
+    testWidgets('stays two seconds', (tester) async {
+      expect(noticeDuration, const Duration(seconds: 2));
+      await tester.pumpWidget(host((context) => showNotice(context, kind: NoticeKind.done, title: 'تم الحجز')));
+      await tester.tap(find.text('open'));
+      await tester.pumpAndSettle();
+      await tester.pump(const Duration(milliseconds: 1000));
+      expect(find.text('تم الحجز'), findsOneWidget);
+      await tester.pump(const Duration(milliseconds: 1100));
+      await tester.pumpAndSettle();
+      expect(find.text('تم الحجز'), findsNothing);
+    });
+
+    testWidgets('appears still when the phone asks for less motion', (tester) async {
+      await tester.pumpWidget(MediaQuery(
+        data: const MediaQueryData(disableAnimations: true),
+        child: host((context) => showNotice(context, kind: NoticeKind.done, title: 'تم الحجز')),
+      ));
       await tester.tap(find.text('open'));
       await tester.pump();
-      expect(calls, isNotEmpty);
+      expect(find.text('تم الحجز'), findsOneWidget);
+      // Already at its end state: the badge needs no frames to appear.
+      final badge = tester.widget<AnimatedBuilder>(
+        find.descendant(of: find.byKey(const Key('notice-badge-done')), matching: find.byType(AnimatedBuilder)).first,
+      );
+      expect((badge.animation as Animation<double>).value, 1);
       await tester.pump(noticeDuration);
       await tester.pumpAndSettle();
     });

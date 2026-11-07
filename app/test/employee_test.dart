@@ -500,7 +500,11 @@ void main() {
       await tester.tap(find.byKey(const Key('delegate-add')));
       await tester.pumpAndSettle();
       expect(repository.addDelegateCalls.single.$1, 'ahmed');
-      expect(find.text('أصبح أحمد علي يستطيع استلام وجباتك.'), findsOneWidget);
+      expect(find.text('تم التخويل'), findsOneWidget);
+      expect(find.text('أحمد علي يستطيع استلام وجباتك.'), findsOneWidget);
+      expect(find.byKey(const Key('notice-badge-person')), findsOneWidget);
+      await _closeNotice(tester);
+      expect(find.text('تم التخويل'), findsNothing);
       expect(find.byKey(const Key('delegate-remove-d-ahmed')), findsOneWidget);
       expect(find.byKey(const Key('delegate-username')), findsOneWidget);
     });
@@ -516,6 +520,7 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(find.byKey(const Key('delegate-add')));
       await tester.pumpAndSettle();
+      await _closeNotice(tester);
       expect(find.byKey(const Key('delegate-remove-d-saad')), findsOneWidget);
       expect(find.byKey(const Key('delegate-remove-d-ahmed')), findsOneWidget);
     });
@@ -543,6 +548,8 @@ void main() {
       await tester.tap(find.byKey(const Key('delegate-remove-confirm')));
       await tester.pumpAndSettle();
       expect(repository.removeDelegateCalls, ['d-saad']);
+      expect(find.text('أُلغي التخويل'), findsOneWidget);
+      await _closeNotice(tester);
       expect(find.byKey(const Key('delegate-remove-d-saad')), findsNothing);
       expect(find.byKey(const Key('delegate-remove-d-ali')), findsOneWidget);
     });
