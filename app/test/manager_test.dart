@@ -339,7 +339,7 @@ void main() {
       await _pumpPage(tester, const MealsTab(), repository, picker: (fromCamera) async => fromCamera ? photo : null);
       await _tapKey(tester, 'add-meal');
       await _tapKey(tester, 'meal-save');
-      expect(find.text('اكتب اسم الوجبة وسعرها أولاً.'), findsOneWidget);
+      expect(find.text('اكتب اسم الوجبة وقيمتها بالنقاط أولاً.'), findsOneWidget);
       expect(repository.savedMeal, isNull);
 
       await tester.enterText(find.byKey(const Key('meal-name')), 'سمك');
