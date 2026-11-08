@@ -5,14 +5,11 @@ name: Create signing key
 # sign with the same key and each new version installs over the last.
 #
 # Losing the password means no phone can ever update again without reinstalling: keep
-# a copy of it outside GitHub. Refuses to run if a key already exists.
+# a copy of it outside GitHub. Refuses to run if a key already exists, so running it
+# again by mistake changes nothing.
 
 on:
   workflow_dispatch:
-    inputs:
-      confirm:
-        description: 'Type CREATE to make the key'
-        required: true
 
 permissions:
   contents: write # commits the encrypted key
@@ -32,15 +29,14 @@ jobs:
       - name: Create and encrypt the key
         env:
           ANDROID_SIGNING_PASSWORD: ${{ secrets.ANDROID_SIGNING_PASSWORD }}
-          CONFIRM: ${{ inputs.confirm }}
         run: |
           set -euo pipefail
-          [ "$CONFIRM" = "CREATE" ] || { echo "Type CREATE to confirm." >&2; exit 1; }
-          [ -n "$ANDROID_SIGNING_PASSWORD" ] || { echo "Add the ANDROID_SIGNING_PASSWORD secret first." >&2; exit 1; }
-          [ "${#ANDROID_SIGNING_PASSWORD}" -ge 20 ] || { echo "The password must be at least 20 characters." >&2; exit 1; }
+          # ::error:: shows the reason on the run's summary page, without opening the step.
+          [ -n "$ANDROID_SIGNING_PASSWORD" ] || { echo "::error::Add the ANDROID_SIGNING_PASSWORD secret first."; exit 1; }
+          [ "${#ANDROID_SIGNING_PASSWORD}" -ge 20 ] || { echo "::error::The password must be at least 20 characters."; exit 1; }
           encrypted=app/signing/zad-upload.jks.enc
           if [ -f "$encrypted" ]; then
-            echo "A key already exists. Replacing it would stop every phone from updating." >&2
+            echo "::error::A key already exists. Replacing it would stop every phone from updating."
             exit 1
           fi
           mkdir -p app/signing
