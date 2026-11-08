@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../core/theme.dart';
 import '../features/auth/auth_controller.dart';
 import '../features/auth/auth_models.dart';
+import '../features/update/update_ui.dart';
 import 'floating_dock.dart';
 
 class ShellPage {
@@ -34,6 +35,26 @@ class _RoleShellState extends ConsumerState<RoleShell> {
   // it stays alive so switching back is instant.
   final _opened = <int>{};
 
+  // Looks for a new version again when the app comes back, at most every few hours.
+  late final AppLifecycleListener _lifecycle;
+  DateTime _updateCheckedAt = DateTime.now();
+
+  @override
+  void initState() {
+    super.initState();
+    _lifecycle = AppLifecycleListener(onResume: () {
+      if (DateTime.now().difference(_updateCheckedAt) < const Duration(hours: 3)) return;
+      _updateCheckedAt = DateTime.now();
+      ref.invalidate(availableUpdateProvider);
+    });
+  }
+
+  @override
+  void dispose() {
+    _lifecycle.dispose();
+    super.dispose();
+  }
+
   Future<void> _confirmSignOut() async {
     final confirmed = await showDialog<bool>(
       context: context,
@@ -56,6 +77,8 @@ class _RoleShellState extends ConsumerState<RoleShell> {
     final name = status is SignedIn ? status.profile.fullName : '';
     final selected = widget.selected ?? _selected;
     _opened.add(selected);
+    final update = ref.watch(availableUpdateProvider).valueOrNull;
+    if (update != null && update.required) return UpdateRequiredScreen(update: update);
     return Scaffold(
       body: SafeArea(
         child: Stack(
@@ -73,6 +96,7 @@ class _RoleShellState extends ConsumerState<RoleShell> {
                     ],
                   ),
                 ),
+                const UpdateBanner(),
                 Expanded(
                   child: IndexedStack(
                     index: selected,

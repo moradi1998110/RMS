@@ -9,6 +9,7 @@ on:
     paths:
       - "app/**"
       - "scripts/fetch-keys.sh"
+      - "scripts/prepare-android.sh"
       - ".github/workflows/app-build.yml"
   workflow_dispatch:
 
@@ -29,6 +30,9 @@ jobs:
         working-directory: app
     steps:
       - uses: actions/checkout@v4
+        with:
+          # The whole history: the build number is the count of commits.
+          fetch-depth: 0
 
       - uses: actions/setup-java@v4
         with:
@@ -42,48 +46,11 @@ jobs:
 
       # Android files are generated until a platform setting needs committing.
       - name: Generate the Android project
+        env:
+          ANDROID_SIGNING_PASSWORD: ${{ secrets.ANDROID_SIGNING_PASSWORD }}
         run: |
-          flutter create --project-name rms --org com.rms --platforms android . 2>&1 | tee ../create.log
-          # flutter create overwrites some of our files, such as the lint rules.
-          git checkout -- .
-          rm -f test/widget_test.dart
-          manifest=android/app/src/main/AndroidManifest.xml
-          sed -i 's|<manifest xmlns:android="http://schemas.android.com/apk/res/android">|&\n    <uses-permission android:name="android.permission.INTERNET"/>\n    <uses-permission android:name="android.permission.CAMERA"/>|' "$manifest"
-          sed -i 's|android:label="[^"]*"|android:label="ZAD"|' "$manifest"
-          grep -q 'android.permission.INTERNET' "$manifest"
-
-      # The launcher icon is drawn in SVG (assets/icon) and rendered here for every
-      # screen density, so no image editor or committed PNGs are needed.
-      - name: Render the app icon
-        run: |
-          sudo apt-get install -y -qq librsvg2-bin > /dev/null
-          res=android/app/src/main/res
-          for density in mdpi:48 hdpi:72 xhdpi:96 xxhdpi:144 xxxhdpi:192; do
-            name="${density%%:*}"
-            size="${density##*:}"
-            mkdir -p "$res/mipmap-$name"
-            rsvg-convert -w "$size" -h "$size" assets/icon/zad_legacy.svg -o "$res/mipmap-$name/ic_launcher.png"
-            # Adaptive layers are 108dp for a 48dp icon.
-            layer=$((size * 108 / 48))
-            rsvg-convert -w "$layer" -h "$layer" assets/icon/zad_foreground.svg -o "$res/mipmap-$name/ic_launcher_foreground.png"
-          done
-          mkdir -p "$res/mipmap-anydpi-v26" "$res/values"
-          cat > "$res/mipmap-anydpi-v26/ic_launcher.xml" <<'XML'
-          <?xml version="1.0" encoding="utf-8"?>
-          <adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
-              <background android:drawable="@color/ic_launcher_background"/>
-              <foreground android:drawable="@mipmap/ic_launcher_foreground"/>
-              <monochrome android:drawable="@mipmap/ic_launcher_foreground"/>
-          </adaptive-icon>
-          XML
-          cat > "$res/values/ic_launcher_background.xml" <<'XML'
-          <?xml version="1.0" encoding="utf-8"?>
-          <resources>
-              <color name="ic_launcher_background">#FFF4E2</color>
-          </resources>
-          XML
-          grep -q 'android:icon="@mipmap/ic_launcher"' android/app/src/main/AndroidManifest.xml
-          # A preview for the published logs, to check the result without a phone.
+          bash ../scripts/prepare-android.sh
+          # A preview for the published logs, to check the icon without a phone.
           rsvg-convert -w 512 -h 512 assets/icon/zad_legacy.svg -o ../icon-preview.png
 
       - name: Get packages
@@ -105,10 +72,18 @@ jobs:
 
       - name: Build the APK
         id: apk
+        env:
+          # Gradle reads it to unlock the release key.
+          ANDROID_SIGNING_PASSWORD: ${{ secrets.ANDROID_SIGNING_PASSWORD }}
         run: |
           source ../scripts/fetch-keys.sh
           [ -n "$PUBLISHABLE_KEY" ] || { echo "No publishable key"; exit 1; }
-          flutter build apk --release --split-per-abi --dart-define=SUPABASE_PUBLISHABLE_KEY="$PUBLISHABLE_KEY" 2>&1 | tee ../apk.log
+          # Rises with every commit, so Android accepts each build as an update.
+          build_number="$(git rev-list --count HEAD)"
+          version="$(sed -n 's/^version: *\([^+]*\).*/\1/p' pubspec.yaml)"
+          flutter build apk --release --split-per-abi --build-number="$build_number" \
+            --dart-define=APP_BUILD="$build_number" --dart-define=APP_VERSION="$version" \
+            --dart-define=SUPABASE_PUBLISHABLE_KEY="$PUBLISHABLE_KEY" 2>&1 | tee ../apk.log
           exit "${PIPESTATUS[0]}"
 
       - uses: actions/upload-artifact@v4

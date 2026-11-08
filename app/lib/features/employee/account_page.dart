@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/format.dart';
 import '../../core/theme.dart';
 import '../../shared/app_sheet.dart';
+import '../update/update_ui.dart';
 import 'delegates_sheet.dart';
 import 'employee_models.dart';
 import 'employee_providers.dart';
@@ -62,6 +63,8 @@ class AccountPage extends ConsumerWidget {
               ],
             ),
           ),
+          const SizedBox(height: 10),
+          const AppVersionRow(),
           const SizedBox(height: 18),
           Text('حركات حسابك', style: textTheme.titleMedium?.copyWith(fontSize: 22)),
           const SizedBox(height: 10),
