@@ -84,7 +84,12 @@ jobs:
           flutter build apk --release --split-per-abi --build-number="$build_number" \
             --dart-define=APP_BUILD="$build_number" --dart-define=APP_VERSION="$version" \
             --dart-define=SUPABASE_PUBLISHABLE_KEY="$PUBLISHABLE_KEY" 2>&1 | tee ../apk.log
-          exit "${PIPESTATUS[0]}"
+          code="${PIPESTATUS[0]}"
+          [ "$code" = 0 ] || exit "$code"
+          # Which key signed it: ZAD's own (CN=ZAD) or Flutter's throwaway debug key.
+          apksigner="$(ls -d "$ANDROID_HOME"/build-tools/*/ | sort -V | tail -1)apksigner"
+          "$apksigner" verify --print-certs build/app/outputs/flutter-apk/app-arm64-v8a-release.apk |
+            grep -E 'Signer #1 certificate (DN|SHA-256)' | tee -a ../apk.log
 
       - uses: actions/upload-artifact@v4
         if: ${{ steps.apk.outcome == 'success' }}
