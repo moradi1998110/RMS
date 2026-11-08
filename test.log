@@ -1,0 +1,146 @@
+
+::group::✅ Passing tests
+✅ /home/runner/work/RMS/RMS/app/test/foundation_test.dart: usernames and passwords a login ignores spaces and case
+✅ /home/runner/work/RMS/RMS/app/test/foundation_test.dart: usernames and passwords a new password needs 8 characters and a matching confirmation
+✅ /home/runner/work/RMS/RMS/app/test/foundation_test.dart: usernames and passwords profile rows are read
+✅ /home/runner/work/RMS/RMS/app/test/foundation_test.dart: routing every account state has its own screen
+✅ /home/runner/work/RMS/RMS/app/test/foundation_test.dart: account state no session means signed out
+✅ /home/runner/work/RMS/RMS/app/test/foundation_test.dart: account state a working session signs in
+✅ /home/runner/work/RMS/RMS/app/test/foundation_test.dart: account state a temporary password must be changed first
+✅ /home/runner/work/RMS/RMS/app/test/foundation_test.dart: account state a disabled account is signed out
+✅ /home/runner/work/RMS/RMS/app/test/foundation_test.dart: account state a login without a profile is signed out
+✅ /home/runner/work/RMS/RMS/app/test/foundation_test.dart: account state no network at startup offers a retry and keeps the session
+✅ /home/runner/work/RMS/RMS/app/test/admin_test.dart: rules Ramadan dates map to their Hijri year, even when moved by the moon sighting
+✅ /home/runner/work/RMS/RMS/app/test/admin_test.dart: rules a week starts on Saturday
+✅ /home/runner/work/RMS/RMS/app/test/admin_test.dart: rules a new user needs a name, a valid login and a restaurant unless admin
+✅ /home/runner/work/RMS/RMS/app/test/admin_test.dart: rules server codes become sentences
+✅ /home/runner/work/RMS/RMS/app/test/admin_test.dart: rules a user row is read, with the wallet as an object or a list
+✅ /home/runner/work/RMS/RMS/app/test/admin_test.dart: rules the week counts served meals by day and every booking by outcome
+✅ /home/runner/work/RMS/RMS/app/test/foundation_test.dart: login screen asks for both fields
+✅ /home/runner/work/RMS/RMS/app/test/foundation_test.dart: login screen explains a wrong password in Arabic
+✅ /home/runner/work/RMS/RMS/app/test/foundation_test.dart: login screen sends what was typed
+✅ /home/runner/work/RMS/RMS/app/test/foundation_test.dart: change password screen refuses a mismatch without calling the server
+✅ /home/runner/work/RMS/RMS/app/test/foundation_test.dart: change password screen saves a valid password and shows the notice
+✅ /home/runner/work/RMS/RMS/app/test/foundation_test.dart: notice closes by itself
+✅ /home/runner/work/RMS/RMS/app/test/foundation_test.dart: notice closes when tapped
+✅ /home/runner/work/RMS/RMS/app/test/foundation_test.dart: notice every kind vibrates as it appears, with its own coloured badge
+✅ /home/runner/work/RMS/RMS/app/test/foundation_test.dart: notice stays two seconds
+✅ /home/runner/work/RMS/RMS/app/test/foundation_test.dart: notice appears still when the phone asks for less motion
+✅ /home/runner/work/RMS/RMS/app/test/foundation_test.dart: role frame the dock switches pages and keeps every label
+✅ /home/runner/work/RMS/RMS/app/test/admin_test.dart: users creates an employee and shows the temporary password once
+✅ /home/runner/work/RMS/RMS/app/test/foundation_test.dart: role frame a page is built only once opened, then kept
+✅ /home/runner/work/RMS/RMS/app/test/foundation_test.dart: role frame signing out asks first
+✅ /home/runner/work/RMS/RMS/app/test/admin_test.dart: users explains a bad form without calling the server
+✅ /home/runner/work/RMS/RMS/app/test/admin_test.dart: users an admin takes no restaurant
+✅ /home/runner/work/RMS/RMS/app/test/admin_test.dart: users shows why a taken username was refused
+✅ /home/runner/work/RMS/RMS/app/test/admin_test.dart: users search narrows the list
+✅ /home/runner/work/RMS/RMS/app/test/admin_test.dart: users edits role and restaurant
+✅ /home/runner/work/RMS/RMS/app/test/admin_test.dart: users refuses to move someone with open bookings, but allows other edits
+✅ /home/runner/work/RMS/RMS/app/test/admin_test.dart: users your own account cannot be reset, disabled or given another role
+✅ /home/runner/work/RMS/RMS/app/test/admin_test.dart: users resets a password after asking
+✅ /home/runner/work/RMS/RMS/app/test/admin_test.dart: users disabling asks first, enabling does not
+✅ /home/runner/work/RMS/RMS/app/test/admin_test.dart: users a failed action says what happened
+✅ /home/runner/work/RMS/RMS/app/test/admin_test.dart: places lists a restaurant with its manager and active employees
+✅ /home/runner/work/RMS/RMS/app/test/admin_test.dart: places adds a site and restaurant, and asks for both names
+✅ /home/runner/work/RMS/RMS/app/test/admin_test.dart: places Ramadan needs dates, shows the impact, then saves
+✅ /home/runner/work/RMS/RMS/app/test/admin_test.dart: finance tops up the chosen employees with a suggested amount
+✅ /home/runner/work/RMS/RMS/app/test/admin_test.dart: finance search then select all takes only the results
+✅ /home/runner/work/RMS/RMS/app/test/admin_test.dart: finance a typed amount works and a retry reuses the key, but a new choice does not
+✅ /home/runner/work/RMS/RMS/app/test/admin_test.dart: summary shows real counts, and a message when the week is empty
+✅ /home/runner/work/RMS/RMS/app/test/admin_test.dart: summary the week chart shows a day when tapped, and as a table
+✅ /home/runner/work/RMS/RMS/app/test/employee_test.dart: booking scenarios every Thursday can be opened and booked from my bookings, not just the last
+✅ /home/runner/work/RMS/RMS/app/test/employee_test.dart: booking scenarios a Saturday shows all three periods, each ready to book
+✅ /home/runner/work/RMS/RMS/app/test/employee_test.dart: booking scenarios a closed meal says when booking ended, an open one until when
+✅ /home/runner/work/RMS/RMS/app/test/employee_test.dart: wording money is grouped
+✅ /home/runner/work/RMS/RMS/app/test/employee_test.dart: wording times read as a person says them
+✅ /home/runner/work/RMS/RMS/app/test/employee_test.dart: wording deadlines are told from the day of the meal
+✅ /home/runner/work/RMS/RMS/app/test/employee_test.dart: wording days have names
+✅ /home/runner/work/RMS/RMS/app/test/employee_test.dart: wording counts agree with the number
+✅ /home/runner/work/RMS/RMS/app/test/employee_test.dart: server data an offering row is read in local time
+✅ /home/runner/work/RMS/RMS/app/test/employee_test.dart: server data a booking row is read
+✅ /home/runner/work/RMS/RMS/app/test/employee_test.dart: server data rejections become sentences
+✅ /home/runner/work/RMS/RMS/app/test/employee_test.dart: server data a settlement has no sign, because the balance moved at booking
+✅ /home/runner/work/RMS/RMS/app/test/employee_test.dart: same meal on later days booking repeats on the same weekday, in the same month, only if still open
+✅ /home/runner/work/RMS/RMS/app/test/employee_test.dart: same meal on later days cancelling counts later meals and reports those past their deadline
+✅ /home/runner/work/RMS/RMS/app/test/employee_test.dart: same meal on later days the next meal is the nearest one still to collect
+✅ /home/runner/work/RMS/RMS/app/test/employee_test.dart: calendar the week starts on Saturday
+✅ /home/runner/work/RMS/RMS/app/test/employee_test.dart: meals page books one meal and tells the user
+✅ /home/runner/work/RMS/RMS/app/test/format_test.dart: points the word agrees with the number, as Arabic needs
+✅ /home/runner/work/RMS/RMS/app/test/format_test.dart: points keeps the sign of a deduction
+✅ /home/runner/work/RMS/RMS/app/test/format_test.dart: points the word alone, for a number shown large beside it
+✅ /home/runner/work/RMS/RMS/app/test/employee_test.dart: meals page repeats a meal for the rest of the month from my bookings
+✅ /home/runner/work/RMS/RMS/app/test/employee_test.dart: meals page without enough money it explains and offers no confirm
+✅ /home/runner/work/RMS/RMS/app/test/employee_test.dart: meals page a retry after a lost connection reuses the same key
+✅ /home/runner/work/RMS/RMS/app/test/employee_test.dart: meals page booked, closed and sold-out meals offer no booking
+✅ /home/runner/work/RMS/RMS/app/test/employee_test.dart: meals page a booked meal is cancelled from its card after a confirmation
+✅ /home/runner/work/RMS/RMS/app/test/employee_test.dart: meals page a booked meal past its cancel time says so instead
+✅ /home/runner/work/RMS/RMS/app/test/employee_test.dart: meals page shows only today, even after booking closes and whatever order the meals arrive in
+✅ /home/runner/work/RMS/RMS/app/test/employee_test.dart: meals page with no meal today it says so and points to my bookings
+✅ /home/runner/work/RMS/RMS/app/test/update_test.dart: what is offered a newer release with a file for this phone
+✅ /home/runner/work/RMS/RMS/app/test/update_test.dart: what is offered nothing when already up to date, or in a development build
+✅ /home/runner/work/RMS/RMS/app/test/update_test.dart: what is offered nothing that would not install on this processor
+✅ /home/runner/work/RMS/RMS/app/test/update_test.dart: what is offered required when older than a mandatory release
+✅ /home/runner/work/RMS/RMS/app/test/update_test.dart: what is offered reads a release as the server sends it
+✅ /home/runner/work/RMS/RMS/app/test/employee_test.dart: delegation the next meal card shows who can collect, with their initials
+✅ /home/runner/work/RMS/RMS/app/test/employee_test.dart: delegation a colleague is found by username, checked by name, then added
+✅ /home/runner/work/RMS/RMS/app/test/employee_test.dart: delegation a second colleague is added next to the first
+✅ /home/runner/work/RMS/RMS/app/test/employee_test.dart: delegation an unknown username explains and adds nobody
+✅ /home/runner/work/RMS/RMS/app/test/employee_test.dart: delegation withdrawing asks first, then removes only that colleague
+✅ /home/runner/work/RMS/RMS/app/test/employee_test.dart: delegation with five chosen it asks to withdraw one before adding
+✅ /home/runner/work/RMS/RMS/app/test/update_test.dart: banner appears when a newer version exists and opens the details
+✅ /home/runner/work/RMS/RMS/app/test/employee_test.dart: delegation a list that fails to load says so and can be retried
+✅ /home/runner/work/RMS/RMS/app/test/update_test.dart: banner stays away when up to date
+✅ /home/runner/work/RMS/RMS/app/test/update_test.dart: download and install shows progress, then opens the installer
+✅ /home/runner/work/RMS/RMS/app/test/update_test.dart: download and install a damaged file is never installed, and can be fetched again
+✅ /home/runner/work/RMS/RMS/app/test/update_test.dart: download and install after allowing installs in settings it installs without downloading again
+✅ /home/runner/work/RMS/RMS/app/test/update_test.dart: download and install a required update cannot be put off
+✅ /home/runner/work/RMS/RMS/app/test/employee_test.dart: rating a collected meal asks for stars, tags and a comment
+✅ /home/runner/work/RMS/RMS/app/test/update_test.dart: version row shows this version and says when it is the newest
+✅ /home/runner/work/RMS/RMS/app/test/employee_test.dart: rating sending needs stars first
+✅ /home/runner/work/RMS/RMS/app/test/update_test.dart: version row opens the update when one is found
+✅ /home/runner/work/RMS/RMS/app/test/employee_test.dart: rating a retry reuses the key and a change starts a new one
+✅ /home/runner/work/RMS/RMS/app/test/employee_test.dart: rating server refusals read as sentences
+✅ /home/runner/work/RMS/RMS/app/test/employee_test.dart: my bookings cancels one meal and returns the money
+✅ /home/runner/work/RMS/RMS/app/test/manager_test.dart: rules a meal needs a name and a price
+✅ /home/runner/work/RMS/RMS/app/test/manager_test.dart: rules times must fall in order
+✅ /home/runner/work/RMS/RMS/app/test/manager_test.dart: rules rule times read from the day of the meal
+✅ /home/runner/work/RMS/RMS/app/test/manager_test.dart: rules a week-only schedule serves only its own remaining days
+✅ /home/runner/work/RMS/RMS/app/test/manager_test.dart: rules copying moves last week-only schedules one week, once
+✅ /home/runner/work/RMS/RMS/app/test/manager_test.dart: rules scan results tell the manager what to do
+✅ /home/runner/work/RMS/RMS/app/test/manager_test.dart: rules the report counts what is due and ranks meals
+✅ /home/runner/work/RMS/RMS/app/test/employee_test.dart: my bookings can cancel the same meal on later weeks too
+✅ /home/runner/work/RMS/RMS/app/test/employee_test.dart: my bookings after the deadline there is no cancel button
+✅ /home/runner/work/RMS/RMS/app/test/employee_test.dart: my bookings shows what happened to past meals
+✅ /home/runner/work/RMS/RMS/app/test/employee_test.dart: account shows both balances and the history
+✅ /home/runner/work/RMS/RMS/app/test/employee_test.dart: account shows the latest page of movements, then more on request
+✅ /home/runner/work/RMS/RMS/app/test/employee_test.dart: loading only what is shown the meals page asks for today alone
+✅ /home/runner/work/RMS/RMS/app/test/employee_test.dart: loading only what is shown my bookings asks for the month on screen, from today
+✅ /home/runner/work/RMS/RMS/app/test/manager_test.dart: meals adds a meal with extras and a photo
+✅ /home/runner/work/RMS/RMS/app/test/manager_test.dart: meals refuses a photo over the size limit
+✅ /home/runner/work/RMS/RMS/app/test/manager_test.dart: meals edits a meal and can stop showing it
+✅ /home/runner/work/RMS/RMS/app/test/manager_test.dart: program schedules a meal on the chosen days
+✅ /home/runner/work/RMS/RMS/app/test/manager_test.dart: program Ramadan has its own two periods and a week-only choice
+✅ /home/runner/work/RMS/RMS/app/test/manager_test.dart: program removes a meal from one day after asking
+✅ /home/runner/work/RMS/RMS/app/test/manager_test.dart: program one hour stops booking and cancelling together
+✅ /home/runner/work/RMS/RMS/app/test/manager_test.dart: program an hour after pickup starts is refused by name
+✅ /home/runner/work/RMS/RMS/app/test/manager_test.dart: program suhoor keeps its hour on the night it is collected
+✅ /home/runner/work/RMS/RMS/app/test/manager_test.dart: today shows counts and cancels a meal with a reason
+✅ /home/runner/work/RMS/RMS/app/test/manager_test.dart: today records a manual delivery with a reason
+✅ /home/runner/work/RMS/RMS/app/test/manager_test.dart: scanning a good scan says deliver and counts it
+✅ /home/runner/work/RMS/RMS/app/test/manager_test.dart: scanning while a result shows, the camera is ignored
+✅ /home/runner/work/RMS/RMS/app/test/manager_test.dart: scanning scanning the same code again uses a new key, so it cannot repeat a stored result
+✅ /home/runner/work/RMS/RMS/app/test/manager_test.dart: scanning a lost connection never says deliver, and a retry keeps the key
+✅ /home/runner/work/RMS/RMS/app/test/manager_test.dart: scanning a refusal says do not deliver and is not counted
+✅ /home/runner/work/RMS/RMS/app/test/manager_test.dart: scanning the backup code needs all six digits
+✅ /home/runner/work/RMS/RMS/app/test/manager_test.dart: reports shows the amount due and the top meals
+✅ /home/runner/work/RMS/RMS/app/test/manager_test.dart: reports shows ratings by meal with the low ones first and what people wrote
+✅ /home/runner/work/RMS/RMS/app/test/manager_test.dart: employee codes moves between codes and shows who each belongs to
+✅ /home/runner/work/RMS/RMS/app/test/manager_test.dart: employee codes a code withdrawn before its time is not shown as collected
+✅ /home/runner/work/RMS/RMS/app/test/manager_test.dart: employee codes says so when nothing is waiting
+✅ /home/runner/work/RMS/RMS/app/test/manager_test.dart: employee codes a later meal says when its code will appear
+✅ /home/runner/work/RMS/RMS/app/test/manager_test.dart: employee codes a code that runs out of time is not shown as collected
+✅ /home/runner/work/RMS/RMS/app/test/manager_test.dart: employee codes a meal collected by a colleague shows who took it and when, in place of the code
+✅ /home/runner/work/RMS/RMS/app/test/manager_test.dart: employee codes a delegated meal that opens later joins the codes
+::endgroup::
+
+🎉 141 tests passed.

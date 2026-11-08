@@ -1,0 +1,46 @@
+Recreating project ....
+  .idea/runConfigurations/main_dart.xml (created)
+  .idea/workspace.xml (created)
+  .idea/modules.xml (created)
+  .idea/libraries/Dart_SDK.xml (created)
+  .idea/libraries/KotlinJavaRuntime.xml (created)
+  android/settings.gradle.kts (created)
+  android/gradle/wrapper/gradle-wrapper.properties (created)
+  android/gradle.properties (created)
+  android/.gitignore (created)
+  android/app/src/debug/AndroidManifest.xml (created)
+  android/app/src/main/AndroidManifest.xml (created)
+  android/app/src/main/res/mipmap-mdpi/ic_launcher.png (created)
+  android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png (created)
+  android/app/src/main/res/drawable/launch_background.xml (created)
+  android/app/src/main/res/mipmap-xhdpi/ic_launcher.png (created)
+  android/app/src/main/res/mipmap-hdpi/ic_launcher.png (created)
+  android/app/src/main/res/drawable-v21/launch_background.xml (created)
+  android/app/src/main/res/values/styles.xml (created)
+  android/app/src/main/res/mipmap-xxhdpi/ic_launcher.png (created)
+  android/app/src/main/res/values-night/styles.xml (created)
+  android/app/src/profile/AndroidManifest.xml (created)
+  android/rms_android.iml (created)
+  android/app/src/main/kotlin/com/rms/rms/MainActivity.kt (created)
+  android/app/build.gradle.kts (created)
+  android/build.gradle.kts (created)
+  rms.iml (created)
+  README.md (created)
+  test/widget_test.dart (created)
+Resolving dependencies...
+Downloading packages...
+Got dependencies.
+Upgrading analysis_options.yaml to exclude build and platform directories.
+Wrote 31 files.
+
+All done!
+You can find general documentation for Flutter at: https://docs.flutter.dev/
+Detailed API documentation is available at: https://api.flutter.dev/
+If you prefer video documentation, consider: https://www.youtube.com/c/flutterdev
+
+In order to run your application, type:
+
+  $ flutter run
+
+Your application code is in ./lib/main.dart.
+
