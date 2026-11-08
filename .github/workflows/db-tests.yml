@@ -25,7 +25,8 @@ jobs:
 
       - uses: supabase/setup-cli@v1
         with:
-          version: latest
+          # Pinned: asking GitHub for "latest" fails whenever its API is slow.
+          version: 3.0.0
 
       # Starting Supabase applies every migration, so a broken migration fails here.
       - name: Apply migrations
