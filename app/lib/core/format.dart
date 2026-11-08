@@ -29,7 +29,20 @@ String money(int amount) {
   return amount < 0 ? '-$grouped' : grouped.toString();
 }
 
-String dinars(int amount) => '${money(amount)} دينار';
+/// Balances, prices and top-ups are points, one point for each unit stored.
+/// The word agrees with the number as Arabic needs: 2 نقطتان, 3–10 نقاط, else نقطة.
+String pointsWord(int amount) => switch (amount.abs()) {
+      2 => 'نقطتان',
+      >= 3 && <= 10 => 'نقاط',
+      _ => 'نقطة',
+    };
+
+/// "6,000 نقطة", "5 نقاط", "نقطة واحدة".
+String points(int amount) => switch (amount.abs()) {
+      1 => amount < 0 ? '-نقطة واحدة' : 'نقطة واحدة',
+      2 => amount < 0 ? '-نقطتان' : 'نقطتان',
+      _ => '${money(amount)} ${pointsWord(amount)}',
+    };
 
 DateTime dayOf(DateTime time) => DateTime(time.year, time.month, time.day);
 

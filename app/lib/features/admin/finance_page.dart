@@ -64,7 +64,7 @@ class _FinancePageState extends ConsumerState<FinancePage> {
         _selected.clear();
         _key = const Uuid().v4();
       });
-      await showNotice(context, kind: NoticeKind.done, title: 'تم الشحن', text: '$count موظف بمبلغ ${dinars(amount)} لكل واحد');
+      await showNotice(context, kind: NoticeKind.done, title: 'تم الشحن', text: '$count موظف بـ ${points(amount)} لكل واحد');
     } on AdminFailure catch (failure) {
       if (mounted) setState(() => _error = failure.message);
     } finally {
@@ -126,7 +126,7 @@ class _FinancePageState extends ConsumerState<FinancePage> {
             ChoiceBox(
               key: Key('wallet-${user.username}'),
               label: user.fullName,
-              trailing: dinars(user.available),
+              trailing: points(user.available),
               selected: _selected.contains(user.id),
               onTap: () => _changed(() {
                 if (!_selected.remove(user.id)) _selected.add(user.id);
@@ -135,7 +135,7 @@ class _FinancePageState extends ConsumerState<FinancePage> {
             const SizedBox(height: 8),
           ],
           const SizedBox(height: 4),
-          const Text('مبلغ الشحن لكل موظف', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500)),
+          const Text('النقاط لكل موظف', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500)),
           const SizedBox(height: 8),
           Row(
             children: [
@@ -158,7 +158,7 @@ class _FinancePageState extends ConsumerState<FinancePage> {
           TextField(
             key: const Key('amount-field'),
             controller: _amount,
-            decoration: const InputDecoration(labelText: 'أو اكتب مبلغاً آخر'),
+            decoration: const InputDecoration(labelText: 'أو اكتب عدداً آخر'),
             style: const TextStyle(fontSize: 22),
             textDirection: TextDirection.ltr,
             keyboardType: TextInputType.number,
@@ -175,8 +175,8 @@ class _FinancePageState extends ConsumerState<FinancePage> {
             ),
             child: Text(
               canTopUp
-                  ? 'سيُشحن ${_selected.length} موظف بمبلغ ${dinars(amount)} لكل واحد. المجموع ${dinars(amount * _selected.length)}.'
-                  : 'اختر موظفاً واحداً على الأقل واكتب المبلغ.',
+                  ? 'سيُشحن ${_selected.length} موظف بـ ${points(amount)} لكل واحد. المجموع ${points(amount * _selected.length)}.'
+                  : 'اختر موظفاً واحداً على الأقل واكتب عدد النقاط.',
               style: const TextStyle(fontSize: 18),
             ),
           ),

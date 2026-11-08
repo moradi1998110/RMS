@@ -107,7 +107,7 @@ class LedgerLine {
 
   String get text {
     final name = employeeName ?? 'موظف';
-    return isTopUp ? 'شحن ${dinars(amount)} لـ$name' : 'تصحيح ${dinars(amount)} لـ$name: ${note ?? ''}';
+    return isTopUp ? 'شحن ${points(amount)} لـ$name' : 'تصحيح ${points(amount)} لـ$name: ${note ?? ''}';
   }
 
   factory LedgerLine.fromRow(Map<String, dynamic> row) {
@@ -147,7 +147,7 @@ class AdminFailure implements Exception {
         'cannot_deactivate_self' => 'لا يمكنك تعطيل حسابك أنت.',
         'forbidden' => 'ليست لديك صلاحية لهذه العملية.',
         'unauthorized' => 'انتهت جلستك. سجّل الخروج ثم ادخل من جديد.',
-        'invalid_amount' => 'اكتب مبلغاً صحيحاً.',
+        'invalid_amount' => 'اكتب عدد نقاط صحيحاً.',
         'empty_selection' => 'اختر موظفاً واحداً على الأقل.',
         'invalid_employee' => 'أحد الموظفين المختارين معطّل. لم يُشحن أحد.',
         'invalid_dates' => datesRule,

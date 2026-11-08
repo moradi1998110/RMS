@@ -30,7 +30,7 @@ Future<void> cancelAndTell(BuildContext context, Booking booking) async {
     context,
     kind: NoticeKind.refund,
     title: result.count > 1 ? 'أُلغيت ${mealCount(result.count)}' : 'أُلغي الحجز',
-    text: 'رجع ${dinars(result.refunded)} إلى رصيدك',
+    text: 'رجع ${points(result.refunded)} إلى رصيدك',
   );
 }
 
@@ -97,7 +97,7 @@ class MealCard extends ConsumerWidget {
                   children: [
                     Expanded(child: Text(offering.name, style: textTheme.titleMedium)),
                     const SizedBox(width: 12),
-                    Text(dinars(offering.price), style: textTheme.titleMedium),
+                    Text(points(offering.price), style: textTheme.titleMedium),
                   ],
                 ),
                 if (offering.description.isNotEmpty) ...[

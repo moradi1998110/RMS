@@ -313,7 +313,7 @@ class _RamadanCardState extends ConsumerState<_RamadanCard> {
               child: Text(
                 impact.offerings == 0
                     ? 'لن تُلغى أي وجبة منشورة.'
-                    : 'ستُلغى ${mealCount(impact.offerings)} منشورة داخل هذه التواريخ، ويرجع مبلغ ${impact.bookings} حجز إلى أصحابها.',
+                    : 'ستُلغى ${mealCount(impact.offerings)} منشورة داخل هذه التواريخ، وترجع نقاط ${impact.bookings} حجز إلى أصحابها.',
                 style: const TextStyle(fontSize: 17, color: AppColors.onWarningSoft),
               ),
             ),

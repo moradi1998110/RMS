@@ -89,7 +89,7 @@ class _MealCard extends StatelessWidget {
                   children: [
                     Expanded(child: Text(meal.name, style: const TextStyle(fontSize: 19, fontWeight: FontWeight.w700))),
                     const SizedBox(width: 12),
-                    Text(dinars(meal.price), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+                    Text(points(meal.price), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
                   ],
                 ),
                 Text(meal.extras.isEmpty ? 'بدون إضافات' : 'معها: ${meal.extras.join('، ')}', style: const TextStyle(fontSize: 17, color: AppColors.inkMuted)),
@@ -236,7 +236,7 @@ class _MealSheetState extends ConsumerState<MealSheet> {
           TextField(
             key: const Key('meal-price'),
             controller: _price,
-            decoration: const InputDecoration(labelText: 'السعر بالدينار'),
+            decoration: const InputDecoration(labelText: 'قيمة الوجبة بالنقاط'),
             style: const TextStyle(fontSize: 19),
             textDirection: TextDirection.ltr,
             keyboardType: TextInputType.number,

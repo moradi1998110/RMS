@@ -59,7 +59,7 @@ class ReportsTab extends ConsumerWidget {
               children: [
                 const Expanded(child: Text('المستحق للمطعم هذا الأسبوع', style: TextStyle(fontSize: 18))),
                 const SizedBox(width: 8),
-                Text(dinars(value.due), key: const Key('week-due'), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+                Text(points(value.due), key: const Key('week-due'), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
               ],
             ),
           ),

@@ -125,11 +125,11 @@ class _BalanceCard extends StatelessWidget {
             Text.rich(
               TextSpan(children: [
                 TextSpan(text: money(wallet.available), style: const TextStyle(fontSize: 38, fontWeight: FontWeight.w700, height: 1.2)),
-                const TextSpan(text: ' دينار', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500)),
+                TextSpan(text: ' ${pointsWord(wallet.available)}', style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w500)),
               ]),
             ),
             const SizedBox(height: 4),
-            Text('محجوز لوجباتك: ${dinars(wallet.held)}'),
+            Text('محجوز لوجباتك: ${points(wallet.held)}'),
           ],
         ),
       ),

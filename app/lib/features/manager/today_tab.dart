@@ -29,7 +29,7 @@ class TodayTab extends ConsumerWidget {
       context,
       kind: NoticeKind.refund,
       title: 'أُلغيت الوجبة',
-      text: refunded == 0 ? 'لم يكن عليها حجز قائم.' : 'رجع مبلغ $refunded حجز إلى أصحابه.',
+      text: refunded == 0 ? 'لم يكن عليها حجز قائم.' : 'رجعت نقاط $refunded حجز إلى أصحابها.',
     );
   }
 
@@ -207,7 +207,7 @@ class _CancelMealSheetState extends ConsumerState<_CancelMealSheet> {
           Text('إلغاء ${widget.meal.name}؟', style: Theme.of(context).textTheme.titleLarge),
           const SizedBox(height: 8),
           Text(
-            'يرجع المبلغ فوراً إلى ${widget.meal.waiting} موظف لم يستلم بعد. الوجبات المستلمة تبقى كما هي.',
+            'ترجع النقاط فوراً إلى ${widget.meal.waiting} موظف لم يستلم بعد. الوجبات المستلمة تبقى كما هي.',
             style: const TextStyle(fontSize: 18),
           ),
           const SizedBox(height: 14),

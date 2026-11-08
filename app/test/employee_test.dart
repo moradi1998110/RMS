@@ -208,7 +208,7 @@ void main() {
     test('rejections become sentences', () {
       expect(
         EmployeeFailure.fromServer('insufficient_balance', {'shortfall': 2000}).message,
-        'ينقصك 2,000 دينار. راجع مسؤول النظام لشحن رصيدك.',
+        'ينقصك 2,000 نقطة. راجع مسؤول النظام لشحن رصيدك.',
       );
       expect(
         EmployeeFailure.fromServer('booking_closed', {'service_date': '2026-11-09'}).message,
@@ -298,7 +298,7 @@ void main() {
       final repository = FakeEmployeeRepository(offeringsValue: [_offering('o1', day)]);
       await _pumpPage(tester, const MealsPage(), repository);
 
-      expect(find.text('50,000 دينار'), findsOneWidget);
+      expect(find.text('50,000 نقطة'), findsOneWidget);
       expect(find.text('معها: سلطة وعصير'), findsOneWidget);
       await tester.tap(find.byKey(const Key('book-o1')));
       await tester.pumpAndSettle();
@@ -329,10 +329,10 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(find.byKey(const Key('book-o1')));
       await tester.pumpAndSettle();
-      expect(find.text('6,000 دينار'), findsWidgets);
+      expect(find.text('6,000 نقطة'), findsWidgets);
       await tester.tap(find.byKey(const Key('book-repeat')));
       await tester.pumpAndSettle();
-      expect(find.text('المبلغ: 18,000 دينار'), findsOneWidget);
+      expect(find.text('النقاط المطلوبة: 18,000 نقطة'), findsOneWidget);
 
       await tester.tap(find.byKey(const Key('book-confirm')));
       await tester.pump();
@@ -351,7 +351,7 @@ void main() {
       await _pumpPage(tester, const MealsPage(), repository);
       await tester.tap(find.byKey(const Key('book-o1')));
       await tester.pumpAndSettle();
-      expect(find.text('ينقصك 5,000 دينار. راجع مسؤول النظام لشحن رصيدك.'), findsOneWidget);
+      expect(find.text('ينقصك 5,000 نقطة. راجع مسؤول النظام لشحن رصيدك.'), findsOneWidget);
       expect(find.byKey(const Key('book-confirm')), findsNothing);
     });
 
@@ -413,7 +413,7 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 500));
       expect(repository.cancelCalls.single.$1, 'b1');
-      expect(find.text('رجع 6,000 دينار إلى رصيدك'), findsOneWidget);
+      expect(find.text('رجع 6,000 نقطة إلى رصيدك'), findsOneWidget);
       await _closeNotice(tester);
       expect(find.byKey(const Key('book-mine')), findsOneWidget);
     });
@@ -692,7 +692,7 @@ void main() {
       expect(repository.cancelCalls.single.$1, 'b1');
       expect(repository.seriesCalls, isEmpty);
       expect(find.text('أُلغي الحجز'), findsOneWidget);
-      expect(find.text('رجع 6,000 دينار إلى رصيدك'), findsOneWidget);
+      expect(find.text('رجع 6,000 نقطة إلى رصيدك'), findsOneWidget);
       await _closeNotice(tester);
       expect(find.byKey(const Key('cancel-b1')), findsNothing);
     });
@@ -711,7 +711,7 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(find.byKey(const Key('cancel-more')));
       await tester.pumpAndSettle();
-      expect(find.text('سيرجع إلى رصيدك فوراً: 18,000 دينار'), findsOneWidget);
+      expect(find.text('سيرجع إلى رصيدك فوراً: 18,000 نقطة'), findsOneWidget);
       expect(find.text('نعم، ألغِ 3 وجبات'), findsOneWidget);
 
       await tester.tap(find.byKey(const Key('cancel-confirm')));
@@ -743,8 +743,8 @@ void main() {
       await _pumpPage(tester, const BookingsPage(), repository);
       await openDay(tester, day);
       expect(find.text('تم الاستلام'), findsOneWidget);
-      expect(find.text('لم تُستلم، واستُقطع المبلغ'), findsOneWidget);
-      expect(find.text('ألغاها المطعم، ورجع المبلغ إلى رصيدك'), findsOneWidget);
+      expect(find.text('لم تُستلم، واستُقطعت النقاط'), findsOneWidget);
+      expect(find.text('ألغاها المطعم، ورجعت النقاط إلى رصيدك'), findsOneWidget);
     });
   });
 

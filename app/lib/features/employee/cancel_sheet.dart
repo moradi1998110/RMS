@@ -94,7 +94,7 @@ class _CancelSheetState extends ConsumerState<CancelSheet> {
             ),
           ],
           const SizedBox(height: 12),
-          FactBox(lines: [('سيرجع إلى رصيدك فوراً:', dinars(refund))]),
+          FactBox(lines: [('سيرجع إلى رصيدك فوراً:', points(refund))]),
           if (_more && series.locked > 0) ...[
             const SizedBox(height: 12),
             Container(

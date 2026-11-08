@@ -96,8 +96,8 @@ class _BookSheetState extends ConsumerState<BookSheet> {
           ],
           const SizedBox(height: 12),
           FactBox(lines: [
-            ('المبلغ:', dinars(total)),
-            ('رصيدك بعد الحجز:', dinars(shortfall > 0 ? 0 : available - total)),
+            ('النقاط المطلوبة:', points(total)),
+            ('رصيدك بعد الحجز:', points(shortfall > 0 ? 0 : available - total)),
             ('يمكنك الإلغاء حتى', deadlineText(pick.cancelUntil, pick.serviceDate)),
           ]),
           if (_error != null) ...[
@@ -106,7 +106,7 @@ class _BookSheetState extends ConsumerState<BookSheet> {
           ],
           if (shortfall > 0) ...[
             const SizedBox(height: 12),
-            ErrorBox('ينقصك ${dinars(shortfall)}. راجع مسؤول النظام لشحن رصيدك.'),
+            ErrorBox('ينقصك ${points(shortfall)}. راجع مسؤول النظام لشحن رصيدك.'),
           ] else ...[
             const SizedBox(height: 12),
             FilledButton(

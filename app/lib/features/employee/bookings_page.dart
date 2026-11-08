@@ -92,7 +92,7 @@ class BookingsPage extends ConsumerWidget {
               borderRadius: BorderRadius.circular(16),
             ),
             child: Text(
-              live.isEmpty ? 'لا توجد حجوزات قادمة في هذا الشهر.' : 'حجوزاتك القادمة هذا الشهر: ${mealCount(live.length)} بمبلغ ${dinars(amount)}.',
+              live.isEmpty ? 'لا توجد حجوزات قادمة في هذا الشهر.' : 'حجوزاتك القادمة هذا الشهر: ${mealCount(live.length)} بـ ${points(amount)}.',
               style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
             ),
           ),
@@ -399,8 +399,8 @@ class _BookingDetails extends StatelessWidget {
 
   (String, Color) get _status => switch (booking.status) {
         BookingStatus.pickedUp => ('تم الاستلام', AppColors.onPrimarySoft),
-        BookingStatus.noShow => ('لم تُستلم، واستُقطع المبلغ', AppColors.onDangerSoft),
-        BookingStatus.cancelledByRestaurant => ('ألغاها المطعم، ورجع المبلغ إلى رصيدك', AppColors.onDangerSoft),
+        BookingStatus.noShow => ('لم تُستلم، واستُقطعت النقاط', AppColors.onDangerSoft),
+        BookingStatus.cancelledByRestaurant => ('ألغاها المطعم، ورجعت النقاط إلى رصيدك', AppColors.onDangerSoft),
         BookingStatus.cancelled => ('أُلغي الحجز', AppColors.inkMuted),
         BookingStatus.booked when booking.canCancelAt(now) => (
             'يمكنك الإلغاء حتى ${deadlineText(booking.cancelUntil, booking.serviceDate)}',
@@ -417,7 +417,7 @@ class _BookingDetails extends StatelessWidget {
       children: [
         Text(booking.mealName, style: const TextStyle(fontSize: 19, fontWeight: FontWeight.w700)),
         const SizedBox(height: 4),
-        Text('${clockRange(booking.pickupFrom, booking.pickupUntil)} · ${dinars(booking.amount)}', style: const TextStyle(fontSize: 17)),
+        Text('${clockRange(booking.pickupFrom, booking.pickupUntil)} · ${points(booking.amount)}', style: const TextStyle(fontSize: 17)),
         const SizedBox(height: 4),
         Text(statusText, style: TextStyle(fontSize: 17, fontWeight: FontWeight.w500, color: statusColor)),
         if (booking.isLive && !booking.pickupOpenAt(now) && now.isBefore(booking.pickupFrom)) ...[

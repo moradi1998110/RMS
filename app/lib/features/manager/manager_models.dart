@@ -108,7 +108,7 @@ class MealDraft {
 }
 
 String? mealProblem(String name, String price) {
-  if (name.trim().isEmpty || (int.tryParse(price) ?? 0) <= 0) return 'اكتب اسم الوجبة وسعرها أولاً.';
+  if (name.trim().isEmpty || (int.tryParse(price) ?? 0) <= 0) return 'اكتب اسم الوجبة وقيمتها بالنقاط أولاً.';
   return null;
 }
 
@@ -365,7 +365,7 @@ class ScanResult {
           if (pickedUpAt != null) 'الساعة ${clock(pickedUpAt!)}',
           if (pickedUpBy != null) 'بواسطة $pickedUpBy',
         ].join(' '),
-      'cancelled' => 'لا يوجد مبلغ مخصوم عليه',
+      'cancelled' => 'لا توجد نقاط مخصومة عليه',
       'wrong_restaurant' => 'وجّه الموظف إلى مطعمه',
       'expired' => 'لا يمكن تسليمها الآن',
       'not_started' => 'اطلب منه العودة في الموعد',

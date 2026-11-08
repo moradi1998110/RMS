@@ -515,7 +515,7 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 500));
       expect(repository.cancelled, ('o1', 'نفد الدجاج'));
-      expect(find.text('رجع مبلغ 3 حجز إلى أصحابه.'), findsOneWidget);
+      expect(find.text('رجعت نقاط 3 حجز إلى أصحابها.'), findsOneWidget);
       await _closeNotice(tester);
     });
 
@@ -620,7 +620,7 @@ void main() {
           ManagerWeekRow(row: WeekRow(date: start, period: MealPeriod.lunch, status: BookingStatus.pickedUp, restaurantId: 'r1'), mealName: 'رز', amount: 6000),
         ]);
       await _pumpPage(tester, const ReportsTab(), repository);
-      expect(_keyText(tester, 'week-due'), '6,000 دينار');
+      expect(_keyText(tester, 'week-due'), '6,000 نقطة');
       expect(find.text('أكثر الوجبات طلباً هذا الأسبوع'), findsOneWidget);
       expect(find.text('رز'), findsOneWidget);
       await tester.scrollUntilVisible(find.byKey(const Key('ratings-empty')), 300);

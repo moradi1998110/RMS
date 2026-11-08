@@ -211,8 +211,8 @@ class WalletTx {
       WalletTxType.topup => 'شحن من مسؤول النظام',
       WalletTxType.hold => 'حجز $meal',
       WalletTxType.release => 'إرجاع إلغاء $meal',
-      WalletTxType.settlePickup => 'استلمت $meal، من المبلغ المحجوز',
-      WalletTxType.settleNoShow => 'لم تُستلم $meal، واستُقطع من المبلغ المحجوز',
+      WalletTxType.settlePickup => 'استلمت $meal، من النقاط المحجوزة',
+      WalletTxType.settleNoShow => 'لم تُستلم $meal، واستُقطعت من النقاط المحجوزة',
       WalletTxType.adjustment => 'تصحيح من مسؤول النظام: ${note ?? ''}',
     };
   }
@@ -257,7 +257,7 @@ class EmployeeFailure implements Exception {
     }
 
     return EmployeeFailure(switch (code) {
-      'insufficient_balance' => 'ينقصك ${dinars((details['shortfall'] as num? ?? 0).toInt())}. راجع مسؤول النظام لشحن رصيدك.',
+      'insufficient_balance' => 'ينقصك ${points((details['shortfall'] as num? ?? 0).toInt())}. راجع مسؤول النظام لشحن رصيدك.',
       'booking_closed' => 'انتهى وقت حجز وجبة${day()}. لم يُخصم شيء.',
       'sold_out' => 'نفدت كمية وجبة${day()}. لم يُخصم شيء.',
       'already_booked' => 'لديك حجز لوجبة${day()}. لم يُخصم شيء.',

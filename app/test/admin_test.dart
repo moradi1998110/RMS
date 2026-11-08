@@ -436,7 +436,7 @@ void main() {
       }
       await _tapKey(tester, 'ramadan-review');
       expect(repository.previewCall, isNotNull);
-      expect(find.textContaining('ويرجع مبلغ 2 حجز'), findsOneWidget);
+      expect(find.textContaining('وترجع نقاط 2 حجز'), findsOneWidget);
 
       await tester.tap(find.byKey(const Key('ramadan-save')));
       await tester.pump();
@@ -459,7 +459,7 @@ void main() {
       await _tapKey(tester, 'wallet-ahmed');
       await _tapKey(tester, 'wallet-sara');
       await _tapKey(tester, 'amount-25000');
-      expect(find.text('سيُشحن 2 موظف بمبلغ 25,000 دينار لكل واحد. المجموع 50,000 دينار.'), findsOneWidget);
+      expect(find.text('سيُشحن 2 موظف بـ 25,000 نقطة لكل واحد. المجموع 50,000 نقطة.'), findsOneWidget);
 
       await tester.tap(find.byKey(const Key('topup-confirm')));
       await tester.pump();
