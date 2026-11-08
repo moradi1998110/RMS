@@ -1,5 +1,5 @@
 -- App releases: the newest one is offered, a mandatory one sets the oldest allowed
--- build, and no one can write releases from the app.
+-- build, and no one can write releases from the app. The files themselves are public.
 
 begin;
 
