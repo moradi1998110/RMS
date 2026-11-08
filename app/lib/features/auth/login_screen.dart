@@ -64,7 +64,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               ),
             ),
             const SizedBox(height: 20),
-            Text('أهلاً بك في\nوجبات الموظفين', style: Theme.of(context).textTheme.headlineMedium),
+            Text('أهلاً بك في\nالمائدة', style: Theme.of(context).textTheme.headlineMedium),
             const SizedBox(height: 28),
             TextField(
               key: const Key('login-username'),
