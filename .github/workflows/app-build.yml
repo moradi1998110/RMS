@@ -49,8 +49,42 @@ jobs:
           rm -f test/widget_test.dart
           manifest=android/app/src/main/AndroidManifest.xml
           sed -i 's|<manifest xmlns:android="http://schemas.android.com/apk/res/android">|&\n    <uses-permission android:name="android.permission.INTERNET"/>\n    <uses-permission android:name="android.permission.CAMERA"/>|' "$manifest"
-          sed -i 's|android:label="[^"]*"|android:label="المائدة"|' "$manifest"
+          sed -i 's|android:label="[^"]*"|android:label="ZAD"|' "$manifest"
           grep -q 'android.permission.INTERNET' "$manifest"
+
+      # The launcher icon is drawn in SVG (assets/icon) and rendered here for every
+      # screen density, so no image editor or committed PNGs are needed.
+      - name: Render the app icon
+        run: |
+          sudo apt-get install -y -qq librsvg2-bin > /dev/null
+          res=android/app/src/main/res
+          for density in mdpi:48 hdpi:72 xhdpi:96 xxhdpi:144 xxxhdpi:192; do
+            name="${density%%:*}"
+            size="${density##*:}"
+            mkdir -p "$res/mipmap-$name"
+            rsvg-convert -w "$size" -h "$size" assets/icon/zad_legacy.svg -o "$res/mipmap-$name/ic_launcher.png"
+            # Adaptive layers are 108dp for a 48dp icon.
+            layer=$((size * 108 / 48))
+            rsvg-convert -w "$layer" -h "$layer" assets/icon/zad_foreground.svg -o "$res/mipmap-$name/ic_launcher_foreground.png"
+          done
+          mkdir -p "$res/mipmap-anydpi-v26" "$res/values"
+          cat > "$res/mipmap-anydpi-v26/ic_launcher.xml" <<'XML'
+          <?xml version="1.0" encoding="utf-8"?>
+          <adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+              <background android:drawable="@color/ic_launcher_background"/>
+              <foreground android:drawable="@mipmap/ic_launcher_foreground"/>
+              <monochrome android:drawable="@mipmap/ic_launcher_foreground"/>
+          </adaptive-icon>
+          XML
+          cat > "$res/values/ic_launcher_background.xml" <<'XML'
+          <?xml version="1.0" encoding="utf-8"?>
+          <resources>
+              <color name="ic_launcher_background">#FFF4E2</color>
+          </resources>
+          XML
+          grep -q 'android:icon="@mipmap/ic_launcher"' android/app/src/main/AndroidManifest.xml
+          # A preview for the published logs, to check the result without a phone.
+          rsvg-convert -w 512 -h 512 assets/icon/zad_legacy.svg -o ../icon-preview.png
 
       - name: Get packages
         run: |
@@ -100,6 +134,7 @@ jobs:
           git reset -q --hard # the logs are untracked, so they stay
           git switch --orphan app-results
           git add -f ./*.log
+          if [ -f icon-preview.png ]; then git add -f icon-preview.png; fi
           git commit -q -m "App logs for ${{ github.sha }}"
           # GitHub sometimes refuses a push for a moment, so try again before failing.
           for attempt in 1 2 3 4 5; do

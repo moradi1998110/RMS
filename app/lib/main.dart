@@ -20,7 +20,7 @@ class RmsApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return MaterialApp.router(
-      title: 'المائدة',
+      title: 'ZAD',
       debugShowCheckedModeBanner: false,
       theme: appTheme(fontFamily: GoogleFonts.ibmPlexSansArabic().fontFamily),
       locale: const Locale('ar'),

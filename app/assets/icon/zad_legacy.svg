@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="108" height="108" viewBox="0 0 108 108">
+  <!-- Icon for Android 7 and older, which show the square as it is. -->
+  <rect width="108" height="108" rx="24" fill="#FFF4E2"/>
+  <g transform="translate(54 54) scale(0.82) translate(-54 -52)">
+    <path d="M42 36c-5-6 5-9 0-15M54 34c-5-6 5-9 0-15M66 36c-5-6 5-9 0-15" stroke="#E0A030" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+    <path d="M26 50a28 9 0 0 1 56 0z" fill="#0F5C54"/>
+    <circle cx="54" cy="40" r="4" fill="#0F5C54"/>
+    <path d="M29 53h50v16a16 16 0 0 1-16 16H45a16 16 0 0 1-16-16z" fill="#0F5C54"/>
+    <path d="M38 64h32" stroke="#E0A030" stroke-width="3" stroke-linecap="round"/>
+    <rect x="18" y="57" width="12" height="6" rx="3" fill="#0F5C54"/>
+    <rect x="78" y="57" width="12" height="6" rx="3" fill="#0F5C54"/>
+  </g>
+</svg>
