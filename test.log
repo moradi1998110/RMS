@@ -1,0 +1,37 @@
+Target: local stack (127.0.0.1:54322)
+3.36: Pulling from supabase/pg_prove
+4f4fb700ef54: Pulling fs layer
+06d62d0de6d7: Pulling fs layer
+a22cb17b3b93: Pulling fs layer
+dcccee43ad5d: Pulling fs layer
+4f4fb700ef54: Already exists
+4f4fb700ef54: Pull complete
+a22cb17b3b93: Download complete
+dcccee43ad5d: Download complete
+06d62d0de6d7: Download complete
+dcccee43ad5d: Pull complete
+a008cf086da5: Download complete
+a22cb17b3b93: Pull complete
+06d62d0de6d7: Pull complete
+Digest: sha256:eda7c5e68719e9c8287e78c017118407b48df904a51c935f5ab6098b8c0bc6bc
+Status: Downloaded newer image for public.ecr.aws/supabase/pg_prove:3.36
+public.ecr.aws/supabase/pg_prove:3.36
+psql:/home/runner/work/RMS/RMS/supabase/tests/app_releases.test.sql:6: NOTICE:  extension "pgtap" already exists, skipping
+/home/runner/work/RMS/RMS/supabase/tests/app_releases.test.sql ........ ok
+psql:/home/runner/work/RMS/RMS/supabase/tests/booking_scenarios.test.sql:6: NOTICE:  extension "pgtap" already exists, skipping
+/home/runner/work/RMS/RMS/supabase/tests/booking_scenarios.test.sql ... ok
+psql:/home/runner/work/RMS/RMS/supabase/tests/core.test.sql:8: NOTICE:  extension "pgtap" already exists, skipping
+/home/runner/work/RMS/RMS/supabase/tests/core.test.sql ................ ok
+psql:/home/runner/work/RMS/RMS/supabase/tests/delegates.test.sql:6: NOTICE:  extension "pgtap" already exists, skipping
+/home/runner/work/RMS/RMS/supabase/tests/delegates.test.sql ........... ok
+psql:/home/runner/work/RMS/RMS/supabase/tests/meal_times.test.sql:5: NOTICE:  extension "pgtap" already exists, skipping
+/home/runner/work/RMS/RMS/supabase/tests/meal_times.test.sql .......... ok
+psql:/home/runner/work/RMS/RMS/supabase/tests/ratings.test.sql:5: NOTICE:  extension "pgtap" already exists, skipping
+/home/runner/work/RMS/RMS/supabase/tests/ratings.test.sql ............. ok
+psql:/home/runner/work/RMS/RMS/supabase/tests/series_and_horizon.test.sql:5: NOTICE:  extension "pgtap" already exists, skipping
+/home/runner/work/RMS/RMS/supabase/tests/series_and_horizon.test.sql .. ok
+psql:/home/runner/work/RMS/RMS/supabase/tests/week_counts.test.sql:5: NOTICE:  extension "pgtap" already exists, skipping
+/home/runner/work/RMS/RMS/supabase/tests/week_counts.test.sql ......... ok
+All tests successful.
+Files=8, Tests=316,  1 wallclock secs ( 0.05 usr  0.02 sys +  0.07 cusr  0.05 csys =  0.19 CPU)
+Result: PASS

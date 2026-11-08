@@ -1,0 +1,35 @@
+Setting up Edge Functions runtime...
+2026-11-08T12:21:01.429813309Z Serving functions on http://127.0.0.1:54321/functions/v1/<function-name>
+2026-11-08T12:21:01.429892088Z  - http://127.0.0.1:54321/functions/v1/create-user
+2026-11-08T12:21:01.429897789Z  - http://127.0.0.1:54321/functions/v1/reset-password
+2026-11-08T12:21:01.429901846Z  - http://127.0.0.1:54321/functions/v1/set-user-active
+2026-11-08T12:21:01.429905183Z Using supabase-edge-runtime-1.77.9 (compatible with Deno v2.1.4)
+2026-11-08T12:21:04.126794888Z serving the request with supabase/functions/create-user
+2026-11-08T12:21:06.293769407Z serving the request with supabase/functions/create-user
+2026-11-08T12:21:06.315769481Z serving the request with supabase/functions/create-user
+2026-11-08T12:21:06.344732095Z serving the request with supabase/functions/create-user
+2026-11-08T12:21:06.388135633Z serving the request with supabase/functions/create-user
+2026-11-08T12:21:06.431714151Z serving the request with supabase/functions/create-user
+2026-11-08T12:21:06.469743065Z serving the request with supabase/functions/create-user
+2026-11-08T12:21:06.498532174Z serving the request with supabase/functions/create-user
+2026-11-08T12:21:06.645815582Z serving the request with supabase/functions/create-user
+2026-11-08T12:21:06.686348691Z serving the request with supabase/functions/create-user
+2026-11-08T12:21:07.045161217Z serving the request with supabase/functions/create-user
+2026-11-08T12:21:07.073593179Z serving the request with supabase/functions/reset-password
+2026-11-08T12:21:07.295479232Z serving the request with supabase/functions/set-user-active
+2026-11-08T12:21:07.497222945Z serving the request with supabase/functions/create-user
+2026-11-08T12:21:07.524250693Z serving the request with supabase/functions/reset-password
+2026-11-08T12:21:07.552010745Z serving the request with supabase/functions/set-user-active
+2026-11-08T12:21:08.245809712Z serving the request with supabase/functions/reset-password
+2026-11-08T12:21:08.277071455Z serving the request with supabase/functions/reset-password
+2026-11-08T12:21:08.687116749Z serving the request with supabase/functions/set-user-active
+2026-11-08T12:21:08.718196848Z serving the request with supabase/functions/set-user-active
+2026-11-08T12:21:08.815929516Z serving the request with supabase/functions/set-user-active
+File change detected: /home/runner/work/RMS/RMS/supabase/functions/_shared/admin.ts (REMOVE)
+File change detected: /home/runner/work/RMS/RMS/supabase/functions/create-user/index.ts (REMOVE)
+File change detected: /home/runner/work/RMS/RMS/supabase/functions/_shared (REMOVE)
+File change detected: /home/runner/work/RMS/RMS/supabase/functions/reset-password/index.ts (REMOVE)
+File change detected: /home/runner/work/RMS/RMS/supabase/functions/create-user (REMOVE)
+File change detected: /home/runner/work/RMS/RMS/supabase/functions/set-user-active/index.ts (REMOVE)
+File change detected: /home/runner/work/RMS/RMS/supabase/functions/reset-password (REMOVE)
+File change detected: /home/runner/work/RMS/RMS/supabase/functions/set-user-active (REMOVE)

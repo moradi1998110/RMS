@@ -1,0 +1,66 @@
+Stopped services: [supabase_inbucket_rms supabase_realtime_rms supabase_imgproxy_rms supabase_pg_meta_rms supabase_studio_rms supabase_analytics_rms supabase_vector_rms supabase_pooler_rms]
+# First admin
+Admin acct-admin created
+ok   - the first admin can sign in
+# Nobody can register alone
+ok   - self sign-up is refused
+# Admin creates the organisation
+ok   - admin adds a site
+ok   - admin adds a restaurant
+# Creating users
+ok   - no sign-in, no account
+ok   - a fake token is refused
+ok   - a bad username is refused
+ok   - an employee needs a restaurant
+ok   - an unknown restaurant is refused
+ok   - an unknown role is refused
+ok   - admin creates an employee
+ok   - the username is stored in lower case
+ok   - a temporary password is issued
+ok   - a duplicate username is refused
+ok   - admin creates a manager
+# The employee signs in
+ok   - the employee signs in with the temporary password
+ok   - the profile asks for a new password
+ok   - the department is stored
+ok   - the employee has an empty wallet
+# Only admins manage accounts
+ok   - non-admin cannot create users
+ok   - non-admin cannot reset passwords
+ok   - non-admin cannot deactivate users
+ok   - non-admin cannot create users
+ok   - non-admin cannot reset passwords
+ok   - non-admin cannot deactivate users
+ok   - a username cannot be changed directly, even by an admin
+ok   - deactivation cannot bypass the function
+ok   - an employee cannot clear the flag directly
+# Meal images
+ok   - a manager uploads to their own restaurant
+ok   - the image opens by its link
+ok   - a manager cannot upload to another restaurant
+ok   - an employee cannot upload
+ok   - only images are accepted
+ok   - an oversized image is refused
+# Changing the password
+ok   - the employee sets a new password
+ok   - the flag clears
+ok   - the temporary password stops working
+ok   - the new password works
+# Resetting a password
+ok   - resetting an unknown user is refused
+ok   - admin resets the password
+ok   - the old password stops working
+ok   - a lost phone can no longer renew its session
+ok   - a new password is asked for again
+# Deactivating
+ok   - an admin cannot deactivate themselves
+ok   - admin deactivates the employee
+ok   - a deactivated user cannot sign in
+ok   - a token still in hand cannot book
+ok   - the wallet is kept
+ok   - admin reactivates the employee
+ok   - the employee can sign in again
+# Audit trail
+ok   - every action is recorded
+ok   - passwords stay out of the audit log
+All account checks passed

@@ -1,0 +1,21 @@
+# Last balance: 8 simultaneous bookings, money for only one
+ok   - exactly one booking succeeds
+ok   - balance never goes negative
+# Last seat: 7 people book a meal with one seat at the same moment
+ok   - exactly one person gets the seat
+ok   - the seat counter is right
+# Double tap: the same request sent 6 times at once
+ok   - only one booking exists
+ok   - the amount is deducted once
+ok   - every request gets the same answer
+# Same meal, two codes: owner and delegate scanned at the same moment, 15 rounds
+ok   - one scan wins and the amount settles once, in every round
+# The restaurant cancels a meal while people are booking it, 5 rounds
+ok   - no booking stays open on a cancelled meal
+# Double tap on cancelling a repeated meal: 5 separate requests at once
+ok   - all four meals are cancelled
+ok   - the refund happens once
+ok   - one request wins
+# Final check
+ok   - every wallet matches its ledger and open bookings
+All concurrency checks passed

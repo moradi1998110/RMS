@@ -1,0 +1,17 @@
+BEGIN
+INSERT 0 2
+DO
+DO
+ ?column?  | count 
+-----------+-------
+ offerings |   213
+(1 row)
+
+ username | available | confirmed 
+----------+-----------+-----------
+ demo-a   |    100000 | t
+ demo-b   |    100000 | t
+(2 rows)
+
+DO
+ROLLBACK
