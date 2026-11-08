@@ -1,4 +1,4 @@
--- App releases: the newest one is offered, a mandatory one sets the oldest allowed
+-- App releases: the newest one is offered to every phone, a mandatory one sets the oldest allowed
 -- build, and no one can write releases from the app. The files themselves are public.
 
 begin;

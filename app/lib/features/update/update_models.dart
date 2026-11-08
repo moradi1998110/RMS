@@ -1,4 +1,4 @@
-/// One APK of a release, built for one processor type.
+/// One APK of a release, built for one processor type (ABI).
 class ReleaseFile {
   const ReleaseFile({required this.path, required this.sha256, required this.size});
 
