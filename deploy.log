@@ -1,0 +1,62 @@
+Target: project ztprvcfwlzxycdjeektg
+Finished supabase link.
+Target: project rms (ztprvcfwlzxycdjeektg) · production
+Confirmed by --yes: Apply 1 migration on project rms (ztprvcfwlzxycdjeektg) · production
+Applying migration 20261108000100_app_releases.sql...
+Finished supabase db push.
+Target: project rms (ztprvcfwlzxycdjeektg) · production
+Confirmed by --yes: Deploy 3 Functions on project rms (ztprvcfwlzxycdjeektg) · production
+Bundling Function: create-user
+v1.77.9: Pulling from supabase/edge-runtime
+a40889badcca: Pulling fs layer
+3765846d0216: Pulling fs layer
+3c5439d0ae62: Pulling fs layer
+575cd1851c16: Pulling fs layer
+ede70a568cf6: Pulling fs layer
+7e118a4f4903: Pulling fs layer
+3765846d0216: Download complete
+3c5439d0ae62: Download complete
+44136fa355b3: Already exists
+8bd5b4af35d6: Download complete
+a40889badcca: Download complete
+575cd1851c16: Download complete
+7e118a4f4903: Download complete
+ede70a568cf6: Download complete
+3c5439d0ae62: Pull complete
+3765846d0216: Pull complete
+575cd1851c16: Pull complete
+7e118a4f4903: Pull complete
+ede70a568cf6: Pull complete
+a40889badcca: Pull complete
+Digest: sha256:6b850a2ccf0bf50ecac9accff8098095cd191c389c2a53c59b857aa0f53a8343
+Status: Downloaded newer image for public.ecr.aws/supabase/edge-runtime:v1.77.9
+public.ecr.aws/supabase/edge-runtime:v1.77.9
+No change found in Function: create-user
+Bundling Function: reset-password
+No change found in Function: reset-password
+Bundling Function: set-user-active
+No change found in Function: set-user-active
+Deployed Functions on project ztprvcfwlzxycdjeektg: create-user, reset-password, set-user-active
+You can inspect your deployment in the Dashboard: https://supabase.com/dashboard/project/ztprvcfwlzxycdjeektg/functions
+Target: project rms (ztprvcfwlzxycdjeektg) · production
+
+  
+   Local            | Remote           | Time (UTC)            
+  ------------------|------------------|-----------------------
+   `20261104000100` | `20261104000100` | `2026-11-04 00:01:00` 
+   `20261104000200` | `20261104000200` | `2026-11-04 00:02:00` 
+   `20261104000300` | `20261104000300` | `2026-11-04 00:03:00` 
+   `20261104000400` | `20261104000400` | `2026-11-04 00:04:00` 
+   `20261104000500` | `20261104000500` | `2026-11-04 00:05:00` 
+   `20261104000600` | `20261104000600` | `2026-11-04 00:06:00` 
+   `20261104000700` | `20261104000700` | `2026-11-04 00:07:00` 
+   `20261104000800` | `20261104000800` | `2026-11-04 00:08:00` 
+   `20261105000100` | `20261105000100` | `2026-11-05 00:01:00` 
+   `20261105000200` | `20261105000200` | `2026-11-05 00:02:00` 
+   `20261106000100` | `20261106000100` | `2026-11-06 00:01:00` 
+   `20261106000200` | `20261106000200` | `2026-11-06 00:02:00` 
+   `20261107000100` | `20261107000100` | `2026-11-07 00:01:00` 
+   `20261107000200` | `20261107000200` | `2026-11-07 00:02:00` 
+   `20261108000100` | `20261108000100` | `2026-11-08 00:01:00` 
+
+auth config update: 200

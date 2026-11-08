@@ -1,0 +1,13 @@
+legacy service key fingerprint: 25a5e5489de11822
+legacy service key answers: 401
+ok   - self sign-up is off
+ok   - signed-out visitors cannot read wallets
+ok   - signed-out visitors cannot read profiles
+ok   - signed-out visitors cannot book
+ok   - signed-out visitors cannot end sessions
+ok   - create-user is deployed and asks for sign-in
+ok   - reset-password is deployed and asks for sign-in
+ok   - set-user-active is deployed and asks for sign-in
+ok   - the secret key can reach the session function
+ok   - the meal images bucket exists
+All live checks passed
