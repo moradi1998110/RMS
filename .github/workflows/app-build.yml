@@ -87,9 +87,13 @@ jobs:
           code="${PIPESTATUS[0]}"
           [ "$code" = 0 ] || exit "$code"
           # Which key signed it: ZAD's own (CN=ZAD) or Flutter's throwaway debug key.
-          apksigner="$(ls -d "$ANDROID_HOME"/build-tools/*/ | sort -V | tail -1)apksigner"
-          "$apksigner" verify --print-certs build/app/outputs/flutter-apk/app-arm64-v8a-release.apk |
-            grep -E 'Signer #1 certificate (DN|SHA-256)' | tee -a ../apk.log
+          # Reported, never fatal: the APK is already built.
+          {
+            sdk="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-/usr/local/lib/android/sdk}}"
+            apksigner="$(find "$sdk/build-tools" -name apksigner -type f | sort -V | tail -1)"
+            echo "signer check with: ${apksigner:-no apksigner found}"
+            [ -n "$apksigner" ] && "$apksigner" verify --print-certs build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+          } 2>&1 | grep -vE 'WARNING' | tee -a ../apk.log || true
 
       - uses: actions/upload-artifact@v4
         if: ${{ steps.apk.outcome == 'success' }}
